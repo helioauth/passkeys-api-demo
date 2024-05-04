@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head th:replace="~{fragment-head :: head}"></head>
+<body>
+<div class="container align-content-center">
+    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+        Invalid username and password.
+    </div>
+    <div th:if="${param.logout}" class="alert alert-primary" role="alert">
+        You have been logged out.
+    </div>
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" id="username">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <a class="btn btn-outline-secondary" href="register">Register</a>
+    </form>
+</div>
+<script>
+    // TODO sign in with passkey
+    // navigator.credentials.create()
+</script>
+
+<div th:replace="~{fragment-footer :: footer}"></div>
+</body>
+</html>
