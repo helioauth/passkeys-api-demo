@@ -6,7 +6,6 @@ import com.helioauth.passkeys.demo.domain.User;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
-import com.helioauth.passkeys.demo.webauthn.DatabaseCredentialRepository;
 import com.yubico.webauthn.FinishRegistrationOptions;
 import com.yubico.webauthn.RegistrationResult;
 import com.yubico.webauthn.RelyingParty;
@@ -73,7 +72,7 @@ public class UserAuthenticator {
 
         return CreateCredentialResponse.builder()
                 .requestId(id)
-                .publicKeyCredentialCreationOptions(request)
+                .publicKeyCredentialCreationOptions(request.toCredentialsCreateJson())
                 .build();
     }
 
@@ -103,8 +102,10 @@ public class UserAuthenticator {
                     .name(userIdentity.getName())
                     .displayName(userIdentity.getDisplayName())
                     .build();
+            userRepository.save(user);
 
             UserCredential userCredential = UserCredential.builder()
+                    .user(user)
                     .credentialId(result.getKeyId().getId().getBase64Url())
                     .userHandle(userIdentity.getId().getBase64Url())
                     .publicKeyCose(result.getPublicKeyCose().getBase64Url())
@@ -115,10 +116,6 @@ public class UserAuthenticator {
                     .attestationObject(pkc.getResponse().getAttestationObject().getBase64Url()) // Store attestation object for future reference
                     .clientDataJson(pkc.getResponse().getClientDataJSON().getBase64Url())    // Store client data for re-verifying signature if needed
                     .build();
-
-            user.setUserCredentials(List.of(userCredential));
-
-            userRepository.save(user);
             userCredentialRepository.save(userCredential);
 
 //            storeCredential(              // Some database access method of your own design

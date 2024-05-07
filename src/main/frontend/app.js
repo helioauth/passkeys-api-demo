@@ -6,18 +6,25 @@ async function generatePasskey() {
 
     const username = document.getElementById("username").value;
     const displayName = document.getElementById("displayName").value;
-    const publicKeyCredential = await getPublicKeyCredential(username, displayName);
+    const createCredentialResponse = await createCredential(username, displayName);
 
-    creationOptionsTextarea.value = JSON.stringify(publicKeyCredential);
+    creationOptionsTextarea.value = JSON.stringify(createCredentialResponse);
     // Return encoded PublicKeyCredential to server
-    const registerResponse = await fetchPostAsJson("/register-credential", JSON.stringify(publicKeyCredential));
+    const registerResponse = await fetchPostAsJson("/register-credential", JSON.stringify(
+        {
+            requestId: createCredentialResponse.requestId,
+            publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
+        }
+    ));
 
     creationOptionsTextarea.value += "\n\n\n" + JSON.stringify(registerResponse);
 }
 
-async function getPublicKeyCredential(name, displayName) {
-    if (sessionStorage.getItem("publicKeyCredential")) {
-        return JSON.parse(sessionStorage.getItem("publicKeyCredential"));
+async function createCredential(name, displayName) {
+    const cacheKey = "publicKeyCredentialResponse";
+
+    if (sessionStorage.getItem(cacheKey)) {
+        return JSON.parse(sessionStorage.getItem(cacheKey));
     }
 
     // Make the call that returns the credentialCreateJson above
@@ -27,12 +34,16 @@ async function getPublicKeyCredential(name, displayName) {
     );
 
     // Call WebAuthn ceremony using webauthn-json wrapper
-    const cco = parseCreationOptionsFromJSON(credentialCreateOptions.publicKeyCredentialCreationOptions);
+    const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
     const publicKeyCredential = await create(cco);
 
-    const cachedCredential = publicKeyCredential.toJSON();
-    sessionStorage.setItem("publicKeyCredential", JSON.stringify(cachedCredential));
-    return cachedCredential;
+    const cachedCredentialResponse = {
+        requestId: credentialCreateOptions.requestId,
+        publicKeyCredential: publicKeyCredential.toJSON()
+    };
+
+    sessionStorage.setItem(cacheKey, JSON.stringify(cachedCredentialResponse));
+    return cachedCredentialResponse;
 }
 
 function fetchPostAsJson(input, body) {
@@ -44,5 +55,9 @@ function fetchPostAsJson(input, body) {
 }
 
 window.addEventListener("load", () => {
-    document.getElementById("generate-passkey").addEventListener("click", generatePasskey)
+    const generatePasskeyBtn = document.getElementById("generate-passkey")
+
+    if (generatePasskeyBtn !== null) {
+        generatePasskeyBtn.addEventListener("click", generatePasskey)
+    }
 });
