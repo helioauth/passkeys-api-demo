@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@ConfigurationProperties(prefix = "demo.relyingparty")
+@ConfigurationProperties(prefix = "relyingparty")
 @ConfigurationPropertiesScan
 @Getter
 @AllArgsConstructor
