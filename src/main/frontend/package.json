@@ -2,7 +2,8 @@
   "name": "helioauth-demo-frontend",
   "private": true,
   "scripts": {
-    "build": "esbuild app.js --sourcemap --bundle --outfile=../resources/static/app.js"
+    "build-dev": "esbuild app.js --sourcemap --bundle --outfile=../resources/static/app.js",
+    "build": "esbuild app.js --minify --bundle --outfile=../resources/static/app.js"
   },
   "dependencies": {
     "@github/webauthn-json": "^2.1.1",

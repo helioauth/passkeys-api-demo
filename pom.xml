@@ -103,12 +103,12 @@
 				</configuration>
 
 				<executions>
-
 					<execution>
 						<id>install node and npm</id>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
+						<phase>generate-resources</phase>
 						<configuration>
 							<!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
 							<nodeVersion>v20.12.2</nodeVersion>
@@ -132,6 +132,7 @@
 						<goals>
 							<goal>npm</goal>
 						</goals>
+						<phase>generate-resources</phase>
 						<configuration>
 							<arguments>run build</arguments>
 						</configuration>
