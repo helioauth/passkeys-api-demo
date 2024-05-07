@@ -7,13 +7,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "registered_credential")
+@Table(name = "demo_registered_credential")
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 public class UserCredential {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column
