@@ -10,8 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @Getter
 @AllArgsConstructor
 public class WebAuthnRelyingPartyProperties {
-
     private String hostname;
-
     private String displayName;
 }

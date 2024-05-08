@@ -2,7 +2,6 @@ package com.helioauth.passkeys.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,7 +23,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/", "/home", "/register", "/error").permitAll()
                         .requestMatchers("/create-credential", "/register-credential").permitAll()
                         .requestMatchers("/app.js", "/app.css").permitAll()
-//                        .requestMatchers(HttpMethod.POST, "/create-credential").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
