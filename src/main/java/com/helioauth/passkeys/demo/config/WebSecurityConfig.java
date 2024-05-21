@@ -20,13 +20,16 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/home", "/register", "/error").permitAll()
                         .requestMatchers("/create-credential", "/register-credential").permitAll()
-                        .requestMatchers("/app.js", "/app.css").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico").permitAll()
+
+//                        .requestMatchers("/", "/dashboard","/error").fullyAuthenticated()
+
+                        .anyRequest().fullyAuthenticated()
                 )
                 .formLogin((form) -> form
-                        .loginPage("/login")
+                        .loginPage("/signin")
+                        .defaultSuccessUrl("/")
                         .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll)
@@ -40,7 +43,7 @@ public class WebSecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("user")
-                .password("password")
+                .password("newthing")
                 .roles("USER")
                 .build();
 
