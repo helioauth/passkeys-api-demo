@@ -6,6 +6,7 @@ import com.helioauth.passkeys.demo.domain.User;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
+import com.helioauth.passkeys.demo.service.exception.UsernameAlreadyRegisteredException;
 import com.yubico.webauthn.FinishRegistrationOptions;
 import com.yubico.webauthn.RegistrationResult;
 import com.yubico.webauthn.RelyingParty;
@@ -29,6 +30,7 @@ public class UserAuthenticator {
 
     private final UserRepository userRepository;
 
+    // TODO Expire cached requests
     private final Map<String, String> cache = new HashMap<>();
 
     private static final SecureRandom random = new SecureRandom();
@@ -43,9 +45,10 @@ public class UserAuthenticator {
 //        this.userRepository = userRepository;
 //    }
 
-    public CreateCredentialResponse startRegistration(String name, String displayName) throws JsonProcessingException {
-        // TODO initiate session for the registration
-        // TODO check if user already registered
+    public CreateCredentialResponse startRegistration(String name) throws JsonProcessingException {
+        userRepository.findByName(name).ifPresent(user -> {
+            throw new UsernameAlreadyRegisteredException();
+        });
 
         ByteArray id = generateRandom(32);
 
@@ -55,7 +58,7 @@ public class UserAuthenticator {
             .user(
                 UserIdentity.builder()
                     .name(name)
-                    .displayName(displayName)
+                    .displayName(name)
                     .id(id)
                     .build()
             )
@@ -79,7 +82,6 @@ public class UserAuthenticator {
         PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> pkc =
                 PublicKeyCredential.parseRegistrationResponseJson(publicKeyCredentialJson);
 
-        // todo not the same id. have a separate request id or session for registration
         String requestJson = cache.get(requestId);
         if (requestJson == null) {
             throw new Exception("registration not found");
@@ -96,7 +98,6 @@ public class UserAuthenticator {
 
             UserIdentity userIdentity = request.getUser();
 
-            // TODO check if user exists
             User user = User.builder()
                     .name(userIdentity.getName())
                     .displayName(userIdentity.getDisplayName())
