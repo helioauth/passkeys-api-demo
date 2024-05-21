@@ -1,49 +1,53 @@
-import {create, parseCreationOptionsFromJSON, supported} from "@github/webauthn-json/browser-ponyfill";
+import {create, parseCreationOptionsFromJSON} from "@github/webauthn-json/browser-ponyfill";
 
-async function generatePasskey() {
-    const creationOptionsTextarea = document.getElementById("creation-options");
-    // const credentialCreateOptions = creationOptionsTextarea.value;
+async function signUpWithPasskey() {
+    for (const inputElement of document.getElementsByTagName("input")) {
+        inputElement.classList.remove("is-invalid");
+    }
+    document.getElementById("error-message").classList.add("d-none");
 
-    const username = document.getElementById("username").value;
-    const displayName = document.getElementById("displayName").value;
-    const createCredentialResponse = await createCredential(username, displayName);
+    const email = document.getElementById("email").value;
 
-    creationOptionsTextarea.value = JSON.stringify(createCredentialResponse);
-    // Return encoded PublicKeyCredential to server
-    const registerResponse = await fetchPostAsJson("/register-credential", JSON.stringify(
-        {
-            requestId: createCredentialResponse.requestId,
-            publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
+    try {
+        const createCredentialResponse = await createCredential(email);
+
+        await fetchPostAsJson("/register-credential", JSON.stringify(
+            {
+                requestId: createCredentialResponse.requestId,
+                publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
+            }
+        ));
+    } catch (e) {
+        if (e.message.length > 0) {
+            document.getElementById("error-message").innerText = e.message;
+            document.getElementById("error-message").classList.remove("d-none");
         }
-    ));
-
-    creationOptionsTextarea.value += "\n\n\n" + JSON.stringify(registerResponse);
+    }
 }
 
-async function createCredential(name, displayName) {
-    const cacheKey = "publicKeyCredentialResponse";
+async function createCredential(name) {
+    try {
+        const credentialCreateOptions = await fetchPostAsJson(
+            "/create-credential",
+            JSON.stringify({name})
+        );
+        const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
+        const publicKeyCredential = await create(cco);
 
-    if (sessionStorage.getItem(cacheKey)) {
-        return JSON.parse(sessionStorage.getItem(cacheKey));
+        return {
+            requestId: credentialCreateOptions.requestId,
+            publicKeyCredential: publicKeyCredential.toJSON()
+        };
+    } catch (response) {
+        if (response.status >= 400 && response.status <= 499) {
+            const errorDetails = await response.json();
+            document.getElementById("email-invalid-message").innerText = (errorDetails.message ?? "Invalid email address");
+            document.getElementById("email").classList.add("is-invalid");
+            throw new Error();
+        }
+
+        throw new Error("Oops, something went wrong");
     }
-
-    // Make the call that returns the credentialCreateJson above
-    const credentialCreateOptions = await fetchPostAsJson(
-        "/create-credential",
-        JSON.stringify({name, displayName})
-    );
-
-    // Call WebAuthn ceremony using webauthn-json wrapper
-    const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
-    const publicKeyCredential = await create(cco);
-
-    const cachedCredentialResponse = {
-        requestId: credentialCreateOptions.requestId,
-        publicKeyCredential: publicKeyCredential.toJSON()
-    };
-
-    sessionStorage.setItem(cacheKey, JSON.stringify(cachedCredentialResponse));
-    return cachedCredentialResponse;
 }
 
 function fetchPostAsJson(input, body) {
@@ -51,13 +55,21 @@ function fetchPostAsJson(input, body) {
         method: "POST",
         body: body,
         headers: {"Content-Type": "application/json"}
-    }).then(resp => resp.json());
+    })
+    .catch(reason => console.log("Connection error: " + reason.toString()))
+    .then(resp => {
+        if (resp.ok) {
+            return resp.json();
+        }
+
+        throw resp;
+    });
 }
 
 window.addEventListener("load", () => {
-    const generatePasskeyBtn = document.getElementById("generate-passkey")
+    const signUpBtn = document.getElementById("signup-button")
 
-    if (generatePasskeyBtn !== null) {
-        generatePasskeyBtn.addEventListener("click", generatePasskey)
+    if (signUpBtn !== null) {
+        signUpBtn.addEventListener("click", signUpWithPasskey)
     }
 });

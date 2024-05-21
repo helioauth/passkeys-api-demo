@@ -33,5 +33,6 @@ build/
 .vscode/
 /src/main/frontend/node/
 /src/main/frontend/node_modules/
-/src/main/resources/static/app.js
 /data/
+/src/main/resources/static/js/app.js
+/src/main/resources/static/js/app.js.map
