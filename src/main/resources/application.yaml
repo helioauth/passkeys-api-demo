@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: demo
+  datasource:
+    url: jdbc:h2:file:./data/demodb;AUTO_SERVER=true
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    generate-ddl: true
+
+relyingparty:
+  display-name: LocalHost
+  hostname: localhost
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
