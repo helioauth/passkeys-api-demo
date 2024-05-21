@@ -1,6 +1,12 @@
 import {create, parseCreationOptionsFromJSON} from "@github/webauthn-json/browser-ponyfill";
 
-async function signUpWithPasskey() {
+async function signUpWithPasskey(event) {
+    event.preventDefault();
+    if (event.target.checkValidity() === false) {
+        event.target.reportValidity();
+        return;
+    }
+
     for (const inputElement of document.getElementsByTagName("input")) {
         inputElement.classList.remove("is-invalid");
     }
@@ -67,9 +73,9 @@ function fetchPostAsJson(input, body) {
 }
 
 window.addEventListener("load", () => {
-    const signUpBtn = document.getElementById("signup-button")
+    const signUpForm = document.getElementById("signup-form")
 
-    if (signUpBtn !== null) {
-        signUpBtn.addEventListener("click", signUpWithPasskey)
+    if (signUpForm !== null) {
+        signUpForm.addEventListener("submit", signUpWithPasskey)
     }
 });
