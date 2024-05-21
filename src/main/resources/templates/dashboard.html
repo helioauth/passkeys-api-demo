@@ -5,7 +5,14 @@
 <div class="container align-content-center">
     <h1>Welcome!</h1>
 
-    <p>Click <a th:href="@{/hello}">here</a> to see a greeting.</p>
+    <p>List passkeys</p>
+    <ul>
+        <li>...</li>
+        <li>...</li>
+        <li>...</li>
+    </ul>
+
+    <a class="btn btn-info" th:href="@{/logout}">Logout</a>
 </div>
 <div th:replace="~{fragment-footer :: footer}"></div>
 </body>
