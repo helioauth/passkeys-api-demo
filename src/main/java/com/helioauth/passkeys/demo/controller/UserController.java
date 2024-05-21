@@ -8,11 +8,7 @@ import com.helioauth.passkeys.demo.service.UserAuthenticator;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @AllArgsConstructor
@@ -20,24 +16,10 @@ public class UserController {
 
     UserAuthenticator userAuthenticator;
 
-    @GetMapping("/register")
-    public String getRegisterUser(Model model) {
-
-        model.addAttribute("creationOptions", "<empty>");
-
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String postRegisterUser(Model model) throws JsonProcessingException {
-        model.addAttribute("success", true);
-        return "register";
-    }
-
     @PostMapping(value = "/create-credential", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public CreateCredentialResponse postCreateCredential(@RequestBody CreateCredentialRequest createCredentialRequest) throws JsonProcessingException {
-        return userAuthenticator.startRegistration(createCredentialRequest.getName(), createCredentialRequest.getDisplayName());
+        return userAuthenticator.startRegistration(createCredentialRequest.name());
     }
 
     @PostMapping(value = "/register-credential", produces = MediaType.APPLICATION_JSON_VALUE)
