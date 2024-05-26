@@ -2,26 +2,32 @@ package com.helioauth.passkeys.demo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.helioauth.passkeys.demo.contract.CreateCredentialResponse;
+import com.helioauth.passkeys.demo.contract.StartAssertionResponse;
 import com.helioauth.passkeys.demo.domain.User;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
 import com.helioauth.passkeys.demo.service.exception.UsernameAlreadyRegisteredException;
-import com.yubico.webauthn.FinishRegistrationOptions;
-import com.yubico.webauthn.RegistrationResult;
-import com.yubico.webauthn.RelyingParty;
-import com.yubico.webauthn.StartRegistrationOptions;
+import com.yubico.webauthn.*;
 import com.yubico.webauthn.data.*;
+import com.yubico.webauthn.exception.AssertionFailedException;
 import com.yubico.webauthn.exception.RegistrationFailedException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @AllArgsConstructor
+@Transactional
 public class UserAuthenticator {
 
     private final RelyingParty relyingParty;
@@ -34,16 +40,6 @@ public class UserAuthenticator {
     private final Map<String, String> cache = new HashMap<>();
 
     private static final SecureRandom random = new SecureRandom();
-
-//    UserAuthenticator(
-//            DatabaseCredentialRepository databaseCredentialRepository,
-//            UserCredentialRepository userCredentialRepository,
-//            UserRepository userRepository
-//    ) {
-//
-//        this.userCredentialRepository = userCredentialRepository;
-//        this.userRepository = userRepository;
-//    }
 
     public CreateCredentialResponse startRegistration(String name) throws JsonProcessingException {
         userRepository.findByName(name).ifPresent(user -> {
@@ -70,10 +66,11 @@ public class UserAuthenticator {
             .build()
         );
 
-        cache.putIfAbsent(id.getBase64Url(), request.toJson());
+        String requestId = id.getHex();
+        cache.putIfAbsent(requestId, request.toJson());
 
         return CreateCredentialResponse.builder()
-                .requestId(id)
+                .requestId(requestId)
                 .publicKeyCredentialCreationOptions(request.toCredentialsCreateJson())
                 .build();
     }
@@ -86,6 +83,7 @@ public class UserAuthenticator {
         if (requestJson == null) {
             throw new Exception("registration not found");
         }
+        cache.remove(requestId);
 
         try {
             PublicKeyCredentialCreationOptions request = PublicKeyCredentialCreationOptions.fromJson(requestJson);
@@ -106,29 +104,18 @@ public class UserAuthenticator {
 
             UserCredential userCredential = UserCredential.builder()
                     .user(user)
-                    .credentialId(result.getKeyId().getId().getBase64Url())
-                    .userHandle(userIdentity.getId().getBase64Url())
-                    .publicKeyCose(result.getPublicKeyCose().getBase64Url())
+                    .credentialId(result.getKeyId().getId().getBase64())
+                    .userHandle(userIdentity.getId().getBase64())
+                    .publicKeyCose(result.getPublicKeyCose().getBase64())
                     .signatureCount(result.getSignatureCount())
                     .backupEligible(result.isBackupEligible())
                     .backupState(result.isBackedUp())
                     .isDiscoverable(result.isDiscoverable().orElse(false))
-                    .attestationObject(pkc.getResponse().getAttestationObject().getBase64Url()) // Store attestation object for future reference
-                    .clientDataJson(pkc.getResponse().getClientDataJSON().getBase64Url())    // Store client data for re-verifying signature if needed
+                    .attestationObject(pkc.getResponse().getAttestationObject().getBase64()) // Store attestation object for future reference
+                    .clientDataJson(pkc.getResponse().getClientDataJSON().getBase64())    // Store client data for re-verifying signature if needed
                     .build();
             userCredentialRepository.save(userCredential);
 
-//            storeCredential(              // Some database access method of your own design
-//                    "alice",                    // Username or other appropriate user identifier
-//                    result.getKeyId(),          // Credential ID and transports for allowCredentials
-//                    result.getPublicKeyCose(),  // Public key for verifying authentication signatures
-//                    result.getSignatureCount(), // Initial signature counter value
-//                    result.isDiscoverable(),    // Is this a passkey?
-//                    result.isBackupEligible(),  // Can this credential be backed up (synced)?
-//                    result.isBackedUp(),        // Is this credential currently backed up?
-//                    pkc.getResponse().getAttestationObject(), // Store attestation object for future reference
-//                    pkc.getResponse().getClientDataJSON()     // Store client data for re-verifying signature if needed
-//            );
         } catch (RegistrationFailedException e) {
             throw e;
         } finally {

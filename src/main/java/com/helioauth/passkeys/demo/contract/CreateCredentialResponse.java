@@ -7,6 +7,6 @@ import lombok.Value;
 @Value
 @Builder
 public class CreateCredentialResponse {
-    ByteArray requestId;
+    String requestId;
     String publicKeyCredentialCreationOptions;
 }
