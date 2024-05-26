@@ -1,28 +1,18 @@
 import {create, parseCreationOptionsFromJSON} from "@github/webauthn-json/browser-ponyfill";
+import * as webauthnJson from "@github/webauthn-json";
 
-async function signUpWithPasskey(event) {
-    event.preventDefault();
-    if (event.target.checkValidity() === false) {
-        event.target.reportValidity();
-        return;
-    }
-
-    for (const inputElement of document.getElementsByTagName("input")) {
-        inputElement.classList.remove("is-invalid");
-    }
-    document.getElementById("error-message").classList.add("d-none");
-
+async function signUpWithPasskey() {
     const email = document.getElementById("email").value;
 
     try {
         const createCredentialResponse = await createCredential(email);
 
-        await fetchPostAsJson("/register-credential", JSON.stringify(
+        await fetchPostAsJson("/register-credential",
             {
                 requestId: createCredentialResponse.requestId,
                 publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
             }
-        ));
+        );
     } catch (e) {
         if (e.message.length > 0) {
             document.getElementById("error-message").innerText = e.message;
@@ -35,7 +25,7 @@ async function createCredential(name) {
     try {
         const credentialCreateOptions = await fetchPostAsJson(
             "/create-credential",
-            JSON.stringify({name})
+            {name}
         );
         const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
         const publicKeyCredential = await create(cco);
@@ -59,7 +49,7 @@ async function createCredential(name) {
 function fetchPostAsJson(input, body) {
     return fetch(input, {
         method: "POST",
-        body: body,
+        body: JSON.stringify(body),
         headers: {"Content-Type": "application/json"}
     })
     .catch(reason => console.log("Connection error: " + reason.toString()))
@@ -72,10 +62,50 @@ function fetchPostAsJson(input, body) {
     });
 }
 
-window.addEventListener("load", () => {
-    const signUpForm = document.getElementById("signup-form")
+async function signInWithPasskey() {
+    const email = document.getElementById("email").value;
 
+    const optionsResponse = await fetchPostAsJson("/signin-credential-options", {
+        name: email
+    });
+
+    const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.credentialsGetOptions));
+
+    const signinResponse = await fetchPostAsJson("/signin-validate-key", {
+        requestId: optionsResponse.requestId,
+        publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
+    });
+
+    document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
+    document.getElementById("success-message").classList.remove("d-none");
+
+}
+
+function signUpFormValidate(event) {
+    event.preventDefault();
+    if (event.target.checkValidity() === false) {
+        event.target.reportValidity();
+        return;
+    }
+
+    for (const inputElement of document.getElementsByTagName("input")) {
+        inputElement.classList.remove("is-invalid");
+    }
+
+    document.getElementById("error-message").classList.add("d-none");
+    document.getElementById("success-message").classList.add("d-none");
+
+    switch (event.submitter.id) {
+        case "signup-button":
+            return signUpWithPasskey(event);
+        case "signin-button":
+            return signInWithPasskey(event);
+    }
+}
+
+window.addEventListener("load", () => {
+    const signUpForm = document.getElementById("signup-form");
     if (signUpForm !== null) {
-        signUpForm.addEventListener("submit", signUpWithPasskey)
+        signUpForm.addEventListener("submit", signUpFormValidate)
     }
 });
