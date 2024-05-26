@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "demo_registered_credential")
 @Builder
@@ -43,6 +45,9 @@ public class UserCredential {
 
     @Column
     private Boolean isDiscoverable;
+
+    @Column
+    private Instant lastUsedAt;
 
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
