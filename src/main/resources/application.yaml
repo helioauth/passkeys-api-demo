@@ -2,12 +2,12 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:h2:file:./data/demodb;AUTO_SERVER=true
-    driverClassName: org.h2.Driver
-    username: sa
+    url: jdbc:postgresql://localhost:5432/demodb
+    username: demodb
     password: password
   jpa:
-    generate-ddl: true
+    hibernate:
+      ddl-auto: update
 
 relyingparty:
   display-name: LocalHost
