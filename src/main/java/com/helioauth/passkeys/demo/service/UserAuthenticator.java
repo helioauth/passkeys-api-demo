@@ -118,9 +118,59 @@ public class UserAuthenticator {
 
         } catch (RegistrationFailedException e) {
             throw e;
-        } finally {
-            cache.remove(pkc.getId().getBase64Url());
         }
+    }
+
+    public StartAssertionResponse startAssertion(String name) throws JsonProcessingException {
+        AssertionRequest request = relyingParty.startAssertion(StartAssertionOptions.builder()
+                .username(name)
+                .build());
+
+        String requestId = generateRandom(32).getHex();
+        cache.putIfAbsent(requestId, request.toJson());
+
+        return StartAssertionResponse.builder()
+                .requestId(requestId)
+                .credentialsGetOptions(request.toCredentialsGetJson())
+                .build();
+    }
+
+    public String finishAssertion(String requestId, String publicKeyCredentialJson) throws Exception {
+        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> pkc =
+                PublicKeyCredential.parseAssertionResponseJson(publicKeyCredentialJson);
+
+        String requestJson = cache.get(requestId);
+        if (requestJson == null) {
+            throw new Exception("registration not found");
+        }
+        cache.remove(requestId);
+
+        try {
+            AssertionRequest request = AssertionRequest.fromJson(requestJson);
+            AssertionResult result = relyingParty.finishAssertion(FinishAssertionOptions.builder()
+                    .request(request)  // The PublicKeyCredentialRequestOptions from startAssertion above
+                    .response(pkc)
+                    .build());
+
+            if (result.isSuccess()) {
+                log.info(result.toString());
+
+                RegisteredCredential credential = result.getCredential();
+                userCredentialRepository.updateUsageByUserNameAndCredentialId(
+                        result.getSignatureCount(),
+                        Instant.now(),
+                        credential.isBackedUp().orElse(false),
+                        credential.getUserHandle().getBase64(),
+                        credential.getCredentialId().getBase64()
+                );
+
+                return result.getUsername();
+            }
+        } catch (AssertionFailedException e) {
+            throw e;
+        }
+
+        throw new RuntimeException("Authentication failed");
     }
 
     private static ByteArray generateRandom(int length) {
