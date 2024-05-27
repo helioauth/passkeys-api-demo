@@ -22,6 +22,7 @@ public class WebAuthnRelyingPartyConfig {
         return RelyingParty.builder()
                 .identity(rpId)
                 .credentialRepository(databaseCredentialRepository)
+                .allowOriginPort(properties.getAllowOriginPort())
                 .build();
     }
 }

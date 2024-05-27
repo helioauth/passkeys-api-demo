@@ -12,4 +12,5 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 public class WebAuthnRelyingPartyProperties {
     private String hostname;
     private String displayName;
+    private Boolean allowOriginPort;
 }
