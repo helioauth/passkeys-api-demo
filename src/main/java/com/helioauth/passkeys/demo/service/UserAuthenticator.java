@@ -7,6 +7,8 @@ import com.helioauth.passkeys.demo.domain.User;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
+import com.helioauth.passkeys.demo.service.exception.SignInFailedException;
+import com.helioauth.passkeys.demo.service.exception.SignUpFailedException;
 import com.helioauth.passkeys.demo.service.exception.UsernameAlreadyRegisteredException;
 import com.yubico.webauthn.*;
 import com.yubico.webauthn.data.*;
@@ -15,10 +17,9 @@ import com.yubico.webauthn.exception.RegistrationFailedException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.HashMap;
@@ -75,13 +76,13 @@ public class UserAuthenticator {
                 .build();
     }
 
-    public void finishRegistration(String requestId, String publicKeyCredentialJson) throws Exception {
+    public void finishRegistration(String requestId, String publicKeyCredentialJson) throws IOException {
         PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> pkc =
                 PublicKeyCredential.parseRegistrationResponseJson(publicKeyCredentialJson);
 
         String requestJson = cache.get(requestId);
         if (requestJson == null) {
-            throw new Exception("registration not found");
+            throw new SignUpFailedException();
         }
         cache.remove(requestId);
 
@@ -117,7 +118,7 @@ public class UserAuthenticator {
             userCredentialRepository.save(userCredential);
 
         } catch (RegistrationFailedException e) {
-            throw e;
+            throw new SignUpFailedException();
         }
     }
 
@@ -135,17 +136,18 @@ public class UserAuthenticator {
                 .build();
     }
 
-    public String finishAssertion(String requestId, String publicKeyCredentialJson) throws Exception {
-        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> pkc =
-                PublicKeyCredential.parseAssertionResponseJson(publicKeyCredentialJson);
-
+    public String finishAssertion(String requestId, String publicKeyCredentialJson) throws IOException {
         String requestJson = cache.get(requestId);
         if (requestJson == null) {
-            throw new Exception("registration not found");
+            log.error("Request id {} not found in cache", requestId);
+            throw new SignInFailedException();
         }
         cache.remove(requestId);
 
         try {
+            PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> pkc =
+                    PublicKeyCredential.parseAssertionResponseJson(publicKeyCredentialJson);
+
             AssertionRequest request = AssertionRequest.fromJson(requestJson);
             AssertionResult result = relyingParty.finishAssertion(FinishAssertionOptions.builder()
                     .request(request)  // The PublicKeyCredentialRequestOptions from startAssertion above
@@ -167,10 +169,11 @@ public class UserAuthenticator {
                 return result.getUsername();
             }
         } catch (AssertionFailedException e) {
-            throw e;
+            log.info("Assertion failed", e);
+            throw new SignInFailedException();
         }
 
-        throw new RuntimeException("Authentication failed");
+        throw new SignInFailedException();
     }
 
     private static ByteArray generateRandom(int length) {

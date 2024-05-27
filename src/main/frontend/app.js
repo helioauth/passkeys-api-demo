@@ -7,12 +7,17 @@ async function signUpWithPasskey() {
     try {
         const createCredentialResponse = await createCredential(email);
 
-        await fetchPostAsJson("/register-credential",
+        const registrationResponse = await fetchPostAsJson("/register-credential",
             {
                 requestId: createCredentialResponse.requestId,
                 publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
             }
         );
+
+        if (registrationResponse.requestId === createCredentialResponse.requestId) {
+            document.getElementById("success-message").innerText = "Thanks for signing up! You can sign in with your passkey below."
+            document.getElementById("success-message").classList.remove("d-none");
+        }
     } catch (e) {
         if (e.message.length > 0) {
             document.getElementById("error-message").innerText = e.message;
@@ -42,6 +47,10 @@ async function createCredential(name) {
             throw new Error();
         }
 
+        if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
+            throw new Error("Authentication cancelled.");
+        }
+
         throw new Error("Oops, something went wrong");
     }
 }
@@ -65,19 +74,35 @@ function fetchPostAsJson(input, body) {
 async function signInWithPasskey() {
     const email = document.getElementById("email").value;
 
-    const optionsResponse = await fetchPostAsJson("/signin-credential-options", {
-        name: email
-    });
+    try {
+        const optionsResponse = await fetchPostAsJson("/signin-credential-options", {
+            name: email
+        });
 
-    const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.credentialsGetOptions));
+        const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.credentialsGetOptions));
 
-    const signinResponse = await fetchPostAsJson("/signin-validate-key", {
-        requestId: optionsResponse.requestId,
-        publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
-    });
+        const signinResponse = await fetchPostAsJson("/signin-validate-key", {
+            requestId: optionsResponse.requestId,
+            publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
+        });
 
-    document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
-    document.getElementById("success-message").classList.remove("d-none");
+        document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
+        document.getElementById("success-message").classList.remove("d-none");
+
+    } catch (response) {
+        // TODO fix error handling
+        if (response.status >= 400 && response.status <= 499) {
+            const errorDetails = await response.json();
+            document.getElementById("email-invalid-message").innerText = (errorDetails.message ?? "Invalid email address");
+            document.getElementById("email").classList.add("is-invalid");
+        } else if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
+            document.getElementById("error-message").innerText = "Authentication cancelled.";
+            document.getElementById("error-message").classList.remove("d-none");
+        } else if (response.message !== null) {
+            document.getElementById("error-message").innerText = response.message;
+            document.getElementById("error-message").classList.remove("d-none");
+        }
+    }
 
 }
 
