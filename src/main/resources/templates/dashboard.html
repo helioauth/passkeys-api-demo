@@ -1,16 +1,33 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:replace="~{fragment-head :: head}"> </head>
 <body>
 <div class="container align-content-center">
-    <h1>Welcome!</h1>
+    <h1>Welcome, <span sec:authentication="name">User</span>!</h1>
 
     <p>List passkeys</p>
-    <ul>
-        <li>...</li>
-        <li>...</li>
-        <li>...</li>
-    </ul>
+    <table>
+        <thead>
+            <th>Credential Id</th>
+            <th>User handle</th>
+            <th>Last used at</th>
+            <th>Signature count</th>
+        </thead>
+        <tbody>
+            <tr th:each="passkey : ${passkeys}">
+                <td th:text="${passkey.credentialId()}"></td>
+                <td th:text="${passkey.userHandle()}"></td>
+                <td th:text="${passkey.lastUsedAt()}"></td>
+                <td th:text="${passkey.signatureCount()}"></td>
+            </tr>
+        </tbody>
+    </table>
+<!--    <ul>-->
+<!--        <li th:each="passkey : ${passkeys}">-->
+<!--            <span th:text="${passkey.credentialId}"> Credential Id</span>-->
+<!--        </li>-->
+<!--    </ul>-->
 
     <a class="btn btn-info" th:href="@{/logout}">Logout</a>
 </div>
