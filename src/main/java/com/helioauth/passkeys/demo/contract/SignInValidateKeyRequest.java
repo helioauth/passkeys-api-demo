@@ -1,10 +1,14 @@
 package com.helioauth.passkeys.demo.contract;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Value
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Getter
 public class SignInValidateKeyRequest {
     String requestId;
     String publicKeyCredentialWithAssertion;
