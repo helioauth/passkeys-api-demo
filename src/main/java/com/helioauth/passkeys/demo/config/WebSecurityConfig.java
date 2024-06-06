@@ -57,7 +57,7 @@ public class WebSecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("user")
-                .password("1234")
+                .password("Throwing3-Backspin-Divisive-Grouped")
                 .roles("USER")
                 .build();
 
