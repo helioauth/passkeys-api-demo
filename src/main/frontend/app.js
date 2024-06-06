@@ -63,7 +63,7 @@ function fetchPostAsJson(input, body) {
     })
     .catch(reason => console.log("Connection error: " + reason.toString()))
     .then(resp => {
-        if (resp.ok) {
+        if (resp.ok && !resp.redirected) {
             return resp.json();
         }
 
@@ -86,12 +86,16 @@ async function signInWithPasskey() {
             publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
         });
 
-        document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
-        document.getElementById("success-message").classList.remove("d-none");
+        // document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
+        // document.getElementById("success-message").classList.remove("d-none");
+
+
 
     } catch (response) {
         // TODO fix error handling
-        if (response.status >= 400 && response.status <= 499) {
+        if (response.ok && response.redirected) {
+            window.location.replace(response.url);
+        } else if (response.status >= 400 && response.status <= 499) {
             const errorDetails = await response.json();
             document.getElementById("email-invalid-message").innerText = (errorDetails.message ?? "Invalid email address");
             document.getElementById("email").classList.add("is-invalid");
