@@ -36,6 +36,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/create-credential", "/register-credential").permitAll()
                         .requestMatchers("/signin-credential-options", "/signin-validate-key").permitAll()
                         .requestMatchers("/error/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
                         .anyRequest().authenticated()
                 )

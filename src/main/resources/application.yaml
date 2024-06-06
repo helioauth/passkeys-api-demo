@@ -13,7 +13,3 @@ relyingparty:
   display-name: LocalHost
   hostname: localhost
   allow-origin-port: false
-
-#logging:
-#  level:
-#    org.springframework.security: DEBUG

@@ -1,0 +1,15 @@
+{
+  "healthchecks": {
+    "web": [
+      {
+        "type":        "startup",
+        "name":        "web check",
+        "description": "Checking the Spring Boot Actuator endpoint",
+        "path":        "/actuator/health",
+        "attempts":     10,
+        "initialDelay": 7,
+        "wait": 2
+      }
+    ]
+  }
+}
