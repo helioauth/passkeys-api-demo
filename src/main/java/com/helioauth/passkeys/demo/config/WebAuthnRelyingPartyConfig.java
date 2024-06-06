@@ -15,14 +15,14 @@ public class WebAuthnRelyingPartyConfig {
         WebAuthnRelyingPartyProperties properties
     ) {
         RelyingPartyIdentity rpId = RelyingPartyIdentity.builder()
-                .id(properties.getHostname())
-                .name(properties.getDisplayName())
+                .id(properties.hostname())
+                .name(properties.displayName())
                 .build();
 
         return RelyingParty.builder()
                 .identity(rpId)
                 .credentialRepository(databaseCredentialRepository)
-                .allowOriginPort(properties.getAllowOriginPort())
+                .allowOriginPort(properties.allowOriginPort())
                 .build();
     }
 }
