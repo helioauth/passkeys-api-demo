@@ -1,5 +1,8 @@
 import {create, parseCreationOptionsFromJSON} from "@github/webauthn-json/browser-ponyfill";
 import * as webauthnJson from "@github/webauthn-json";
+import jdenticon from "jdenticon/standalone";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 async function signUpWithPasskey() {
     const email = document.getElementById("email").value;
@@ -136,5 +139,11 @@ window.addEventListener("load", () => {
     const signUpForm = document.getElementById("signup-form");
     if (signUpForm !== null) {
         signUpForm.addEventListener("submit", signUpFormValidate)
+    }
+
+    jdenticon();
+    dayjs.extend(relativeTime);
+    for (const dateElement of document.getElementsByClassName("time-ago")) {
+        dateElement.innerHTML = dayjs(dateElement.getAttribute("data-date")).fromNow();
     }
 });

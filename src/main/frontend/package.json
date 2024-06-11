@@ -6,7 +6,9 @@
   },
   "dependencies": {
     "@github/webauthn-json": "^2.1.1",
-    "bootstrap": "^5.3.3"
+    "bootstrap": "^5.3.3",
+    "dayjs": "^1.11.11",
+    "jdenticon": "^3.3.0"
   },
   "devDependencies": {
     "esbuild": "0.20.2"
