@@ -15,7 +15,7 @@ import com.yubico.webauthn.data.*;
 import com.yubico.webauthn.exception.AssertionFailedException;
 import com.yubico.webauthn.exception.RegistrationFailedException;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Transactional
 public class UserAuthenticator {
 
@@ -130,10 +130,7 @@ public class UserAuthenticator {
         String requestId = generateRandom(32).getHex();
         cache.putIfAbsent(requestId, request.toJson());
 
-        return StartAssertionResponse.builder()
-                .requestId(requestId)
-                .credentialsGetOptions(request.toCredentialsGetJson())
-                .build();
+        return new StartAssertionResponse(requestId, request.toCredentialsGetJson());
     }
 
     public String finishAssertion(String requestId, String publicKeyCredentialJson) throws IOException {

@@ -64,8 +64,8 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> postRegisterCredential(@RequestBody RegisterCredentialRequest request) {
         try {
-            userAuthenticator.finishRegistration(request.getRequestId(), request.getPublicKeyCredential());
-            return ResponseEntity.of(Optional.of(Map.of("requestId", request.getRequestId())));
+            userAuthenticator.finishRegistration(request.requestId(), request.publicKeyCredential());
+            return ResponseEntity.of(Optional.of(Map.of("requestId", request.requestId())));
         } catch (IOException e) {
             log.error("Register Credential failed", e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Register Credential failed");
