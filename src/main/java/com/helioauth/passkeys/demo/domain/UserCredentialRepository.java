@@ -19,5 +19,5 @@ public interface UserCredentialRepository extends JpaRepository<UserCredential, 
 
     @Modifying(flushAutomatically = true)
     @Query("update UserCredential uc set uc.signatureCount = ?1, uc.lastUsedAt = ?2, uc.backupState = ?3 where uc.userHandle = ?4 and uc.credentialId = ?5")
-    void updateUsageByUserNameAndCredentialId(Long signatureCount, Instant lastUsedAt, Boolean backupState, String userHandle, String credentialId);
+    void updateUsageByUserHandleAndCredentialId(Long signatureCount, Instant lastUsedAt, Boolean backupState, String userHandle, String credentialId);
 }

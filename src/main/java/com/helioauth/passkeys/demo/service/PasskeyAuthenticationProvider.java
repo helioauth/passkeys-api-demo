@@ -2,6 +2,7 @@ package com.helioauth.passkeys.demo.service;
 
 import com.helioauth.passkeys.demo.contract.SignInValidateKeyRequest;
 import com.helioauth.passkeys.demo.service.exception.SignInFailedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,14 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 public class PasskeyAuthenticationProvider implements AuthenticationProvider {
-    private final WebAuthnAuthenticator webAuthnAuthenticator;
+    private final UserSignInService userSignInService;
 
-    public PasskeyAuthenticationProvider(WebAuthnAuthenticator webAuthnAuthenticator) {
-        this.webAuthnAuthenticator = webAuthnAuthenticator;
+    public PasskeyAuthenticationProvider(UserSignInService userSignInService) {
+        this.userSignInService = userSignInService;
     }
 
     @Override
@@ -24,12 +25,14 @@ public class PasskeyAuthenticationProvider implements AuthenticationProvider {
         SignInValidateKeyRequest request = (SignInValidateKeyRequest) authentication.getCredentials();
 
         try {
-            String loggedInUsername = webAuthnAuthenticator.finishAssertion(request.getRequestId(), request.getPublicKeyCredentialWithAssertion());
+            String loggedInUsername = userSignInService.finishAssertion(request.getRequestId(), request.getPublicKeyCredentialWithAssertion());
+
             return new PasskeyAuthenticationToken(loggedInUsername, request, List.of(new SimpleGrantedAuthority("USER")));
-        } catch (IOException e) {
-            throw new AuthenticationServiceException(e.getMessage());
         } catch (SignInFailedException e) {
             throw new BadCredentialsException(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new AuthenticationServiceException(e.getMessage());
         }
     }
 

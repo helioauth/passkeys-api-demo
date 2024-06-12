@@ -6,9 +6,11 @@ import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationToken;
+import com.helioauth.passkeys.demo.service.UserSignInService;
 import com.helioauth.passkeys.demo.service.UserSignupService;
 import com.helioauth.passkeys.demo.service.WebAuthnAuthenticator;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,16 +30,16 @@ import java.util.Optional;
 
 @Controller
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
 
-    WebAuthnAuthenticator webAuthnAuthenticator;
+    private final UserSignInService userSignInService;
 
-    UserSignupService userSignupService;
+    private final UserSignupService userSignupService;
 
-    UserCredentialRepository userCredentialRepository;
+    private final UserCredentialRepository userCredentialRepository;
 
-    UserCredentialMapper userCredentialMapper;
+    private final UserCredentialMapper userCredentialMapper;
 
     @GetMapping("/")
     public String dashboard(Authentication user, Model model) {
@@ -68,7 +70,7 @@ public class UserController {
     @ResponseBody
     public StartAssertionResponse postSignInCredential(@RequestBody StartAssertionRequest startAssertionRequest) {
         try {
-            return webAuthnAuthenticator.startAssertion(startAssertionRequest.name());
+            return userSignInService.startAssertion(startAssertionRequest.name());
         } catch (JsonProcessingException e) {
             log.error("Sign in Credential failed", e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sign in Credential failed");

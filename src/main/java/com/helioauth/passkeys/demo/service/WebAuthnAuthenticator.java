@@ -25,12 +25,9 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class WebAuthnAuthenticator {
 
     private final RelyingParty relyingParty;
-
-    private final UserCredentialRepository userCredentialRepository;
 
     // TODO Expire cached requests
     private final Map<String, String> cache = new HashMap<>();
@@ -105,7 +102,7 @@ public class WebAuthnAuthenticator {
         return new StartAssertionResponse(requestId, request.toCredentialsGetJson());
     }
 
-    public String finishAssertion(String requestId, String publicKeyCredentialJson) throws IOException {
+    public CredentialAssertionResultDto finishAssertion(String requestId, String publicKeyCredentialJson) throws IOException {
         String requestJson = cache.get(requestId);
         if (requestJson == null) {
             log.error("Request id {} not found in cache", requestId);
@@ -127,15 +124,15 @@ public class WebAuthnAuthenticator {
                 log.info(result.toString());
 
                 RegisteredCredential credential = result.getCredential();
-                userCredentialRepository.updateUsageByUserNameAndCredentialId(
+
+                return new CredentialAssertionResultDto(
                         result.getSignatureCount(),
                         Instant.now(),
                         credential.isBackedUp().orElse(false),
                         credential.getUserHandle().getBase64(),
-                        credential.getCredentialId().getBase64()
+                        credential.getCredentialId().getBase64(),
+                        result.getUsername()
                 );
-
-                return result.getUsername();
             }
         } catch (AssertionFailedException e) {
             log.info("Assertion failed", e);
