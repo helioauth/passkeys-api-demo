@@ -1,7 +1,7 @@
 package com.helioauth.passkeys.demo.config;
 
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationProvider;
-import com.helioauth.passkeys.demo.service.UserAuthenticator;
+import com.helioauth.passkeys.demo.service.WebAuthnAuthenticator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -66,8 +66,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public PasskeyAuthenticationProvider passkeyAuthenticationProvider(UserAuthenticator userAuthenticator) {
-        return new PasskeyAuthenticationProvider(userAuthenticator);
+    public PasskeyAuthenticationProvider passkeyAuthenticationProvider(WebAuthnAuthenticator webAuthnAuthenticator) {
+        return new PasskeyAuthenticationProvider(webAuthnAuthenticator);
     }
 
     @Bean

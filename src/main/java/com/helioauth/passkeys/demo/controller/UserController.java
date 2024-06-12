@@ -6,7 +6,7 @@ import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationToken;
-import com.helioauth.passkeys.demo.service.UserAuthenticator;
+import com.helioauth.passkeys.demo.service.WebAuthnAuthenticator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserController {
 
-    UserAuthenticator userAuthenticator;
+    WebAuthnAuthenticator webAuthnAuthenticator;
 
     UserCredentialRepository userCredentialRepository;
 
@@ -53,7 +53,7 @@ public class UserController {
     @ResponseBody
     public CreateCredentialResponse postCreateCredential(@RequestBody CreateCredentialRequest createCredentialRequest) {
         try {
-            return userAuthenticator.startRegistration(createCredentialRequest.name());
+            return webAuthnAuthenticator.startRegistration(createCredentialRequest.name());
         } catch (JsonProcessingException e) {
             log.error("Create Credential failed", e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Create Credential failed");
@@ -64,7 +64,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> postRegisterCredential(@RequestBody RegisterCredentialRequest request) {
         try {
-            userAuthenticator.finishRegistration(request.requestId(), request.publicKeyCredential());
+            webAuthnAuthenticator.finishRegistration(request.requestId(), request.publicKeyCredential());
             return ResponseEntity.of(Optional.of(Map.of("requestId", request.requestId())));
         } catch (IOException e) {
             log.error("Register Credential failed", e);
@@ -76,7 +76,7 @@ public class UserController {
     @ResponseBody
     public StartAssertionResponse postSignInCredential(@RequestBody StartAssertionRequest startAssertionRequest) {
         try {
-            return userAuthenticator.startAssertion(startAssertionRequest.name());
+            return webAuthnAuthenticator.startAssertion(startAssertionRequest.name());
         } catch (JsonProcessingException e) {
             log.error("Sign in Credential failed", e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sign in Credential failed");

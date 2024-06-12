@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.util.List;
 
 public class PasskeyAuthenticationProvider implements AuthenticationProvider {
-    private final UserAuthenticator userAuthenticator;
+    private final WebAuthnAuthenticator webAuthnAuthenticator;
 
-    public PasskeyAuthenticationProvider(UserAuthenticator userAuthenticator) {
-        this.userAuthenticator = userAuthenticator;
+    public PasskeyAuthenticationProvider(WebAuthnAuthenticator webAuthnAuthenticator) {
+        this.webAuthnAuthenticator = webAuthnAuthenticator;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class PasskeyAuthenticationProvider implements AuthenticationProvider {
         SignInValidateKeyRequest request = (SignInValidateKeyRequest) authentication.getCredentials();
 
         try {
-            String loggedInUsername = userAuthenticator.finishAssertion(request.getRequestId(), request.getPublicKeyCredentialWithAssertion());
+            String loggedInUsername = webAuthnAuthenticator.finishAssertion(request.getRequestId(), request.getPublicKeyCredentialWithAssertion());
             return new PasskeyAuthenticationToken(loggedInUsername, request, List.of(new SimpleGrantedAuthority("USER")));
         } catch (IOException e) {
             throw new AuthenticationServiceException(e.getMessage());

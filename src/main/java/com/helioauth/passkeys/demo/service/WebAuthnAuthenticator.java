@@ -29,7 +29,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserAuthenticator {
+public class WebAuthnAuthenticator {
 
     private final RelyingParty relyingParty;
 
