@@ -15,10 +15,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import java.io.IOException;
 import java.util.Collections;
 
-public class PasskeyTestFilter extends AbstractAuthenticationProcessingFilter {
+public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/signin-validate-key", "POST");
 
-    public PasskeyTestFilter() {
+    public WebAuthnAuthenticationProcessingFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
     }
 

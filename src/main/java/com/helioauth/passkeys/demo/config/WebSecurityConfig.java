@@ -29,7 +29,9 @@ import java.util.List;
 public class WebSecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, PasskeyTestFilter passkeyTestFilter, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   WebAuthnAuthenticationProcessingFilter webAuthnAuthenticationProcessingFilter,
+                                                   AuthenticationManager authenticationManager) throws Exception {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico").permitAll()
@@ -41,7 +43,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager)
-                .addFilterAfter(passkeyTestFilter, SessionManagementFilter.class)
+                .addFilterAfter(webAuthnAuthenticationProcessingFilter, SessionManagementFilter.class)
                 .formLogin((form) -> form
                         .loginPage("/signin")
                         .defaultSuccessUrl("/")
@@ -83,14 +85,14 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public PasskeyTestFilter passkeyTestFilter(AuthenticationManager authenticationManager) {
-        PasskeyTestFilter passkeyTestFilter = new PasskeyTestFilter();
-        passkeyTestFilter.setAuthenticationManager(authenticationManager);
-        passkeyTestFilter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
-        passkeyTestFilter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
-        passkeyTestFilter.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy());
+    public WebAuthnAuthenticationProcessingFilter webAuthnFilter(AuthenticationManager authenticationManager) {
+        WebAuthnAuthenticationProcessingFilter filter = new WebAuthnAuthenticationProcessingFilter();
+        filter.setAuthenticationManager(authenticationManager);
+        filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
+        filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
+        filter.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy());
 
-        return passkeyTestFilter;
+        return filter;
     }
 
 }
