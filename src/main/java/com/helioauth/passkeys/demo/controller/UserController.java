@@ -6,6 +6,7 @@ import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationToken;
+import com.helioauth.passkeys.demo.service.UserSignupService;
 import com.helioauth.passkeys.demo.service.WebAuthnAuthenticator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +32,8 @@ import java.util.Optional;
 public class UserController {
 
     WebAuthnAuthenticator webAuthnAuthenticator;
+
+    UserSignupService userSignupService;
 
     UserCredentialRepository userCredentialRepository;
 
@@ -52,24 +54,14 @@ public class UserController {
     @PostMapping(value = "/create-credential", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public CreateCredentialResponse postCreateCredential(@RequestBody CreateCredentialRequest createCredentialRequest) {
-        try {
-            return webAuthnAuthenticator.startRegistration(createCredentialRequest.name());
-        } catch (JsonProcessingException e) {
-            log.error("Create Credential failed", e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Create Credential failed");
-        }
+        return userSignupService.startRegistration(createCredentialRequest.name());
     }
 
     @PostMapping(value = "/register-credential", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Map<String, String>> postRegisterCredential(@RequestBody RegisterCredentialRequest request) {
-        try {
-            webAuthnAuthenticator.finishRegistration(request.requestId(), request.publicKeyCredential());
+            userSignupService.finishRegistration(request.requestId(), request.publicKeyCredential());
             return ResponseEntity.of(Optional.of(Map.of("requestId", request.requestId())));
-        } catch (IOException e) {
-            log.error("Register Credential failed", e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Register Credential failed");
-        }
     }
 
     @PostMapping(value = "/signin-credential-options", produces = MediaType.APPLICATION_JSON_VALUE)

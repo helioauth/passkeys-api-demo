@@ -1,4 +1,4 @@
-package com.helioauth.passkeys.demo.controller;
+package com.helioauth.passkeys.demo.service.dto;
 
 import java.time.Instant;
 
