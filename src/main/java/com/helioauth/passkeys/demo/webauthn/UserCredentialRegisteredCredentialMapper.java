@@ -1,4 +1,4 @@
-package com.helioauth.passkeys.demo.mapper;
+package com.helioauth.passkeys.demo.webauthn;
 
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.yubico.webauthn.RegisteredCredential;

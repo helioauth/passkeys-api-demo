@@ -1,30 +1,29 @@
 package com.helioauth.passkeys.demo.webauthn;
 
-import com.helioauth.passkeys.demo.mapper.UserCredentialRegisteredCredentialMapper;
 import com.helioauth.passkeys.demo.domain.User;
+import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
-import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.data.AuthenticatorTransport;
 import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import com.yubico.webauthn.data.PublicKeyCredentialType;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class DatabaseCredentialRepository implements CredentialRepository {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private UserCredentialRepository userCredentialRepository;
+    private final UserCredentialRepository userCredentialRepository;
 
-    private UserCredentialRegisteredCredentialMapper userCredentialRegisteredCredentialMapper;
+    private final UserCredentialRegisteredCredentialMapper userCredentialRegisteredCredentialMapper;
 
     @Override
     public Set<PublicKeyCredentialDescriptor> getCredentialIdsForUsername(String s) {
@@ -69,7 +68,7 @@ public class DatabaseCredentialRepository implements CredentialRepository {
                 credentialId.getBase64()
         );
 
-        return optional.map(userCredential -> userCredentialRegisteredCredentialMapper.toRegisteredCredential(userCredential));
+        return optional.map(userCredentialRegisteredCredentialMapper::toRegisteredCredential);
     }
 
     @Override
