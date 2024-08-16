@@ -1,24 +1,19 @@
-# Use the official gradle image as the base image
-FROM maven:3.9-eclipse-temurin-22-jammy AS _build
+#
+# Build stage
+#
+FROM eclipse-temurin:22-jdk-jammy AS build
+ENV HOME=/usr/app
+RUN mkdir -p $HOME
+WORKDIR $HOME
+ADD . $HOME
+RUN --mount=type=cache,target=/root/.m2 chmod +x ./mvnw \
+    && ./mvnw -f $HOME/pom.xml clean package
 
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the build files to the container
-COPY ./build.gradle .
-COPY ./src ./src
-
-# Build the application using Gradle
-RUN ./mvnw package
-
-# Create a new stage for the final image
-FROM eclipse-temurin:22-jdk-jammy
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the built JAR file from the previous stage
-COPY --from=_build_ /app/target/*.jar /app/
-
-# Configure the container to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+#
+# Package stage
+#
+FROM eclipse-temurin:22-jre-jammy
+ARG JAR_FILE=/usr/app/target/*.jar
+COPY --from=build $JAR_FILE /app/runner.jar
+EXPOSE 8080
+ENTRYPOINT java -jar /app/runner.jar
