@@ -1,4 +1,9 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/demodb
+    username: demodb
+    password: password
+
   # Templates reloading during development
   thymeleaf:
     prefix: file:src/main/resources/templates/
