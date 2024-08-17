@@ -24,6 +24,7 @@ public class PasskeyAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         SignInValidateKeyRequest request = (SignInValidateKeyRequest) authentication.getCredentials();
 
+        // TODO Fix user handle to be the same on all
         try {
             String loggedInUsername = userSignInService.finishAssertion(request.getRequestId(), request.getPublicKeyCredentialWithAssertion());
 

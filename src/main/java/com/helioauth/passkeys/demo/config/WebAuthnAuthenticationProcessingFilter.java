@@ -35,7 +35,11 @@ public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticati
             throw new BadCredentialsException("Unable to parse request body", e);
         }
 
-        PasskeyAuthenticationToken authRequest = new PasskeyAuthenticationToken(signInValidateKeyRequest.getRequestId(), signInValidateKeyRequest, Collections.emptyList());
+        PasskeyAuthenticationToken authRequest = new PasskeyAuthenticationToken(
+                signInValidateKeyRequest.getRequestId(),
+                signInValidateKeyRequest,
+                Collections.emptyList()
+        );
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 }

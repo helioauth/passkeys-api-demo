@@ -30,7 +30,6 @@ public class UserSignupService {
     private final UserCredentialMapper usercredentialMapper;
 
     public CreateCredentialResponse startRegistration(String name) {
-        // TODO Move check in another service
         userRepository.findByName(name).ifPresent(user -> {
             throw new UsernameAlreadyRegisteredException();
         });
@@ -46,6 +45,7 @@ public class UserSignupService {
     @Transactional
     public void finishRegistration(String requestId, String publicKeyCredentialJson) {
         try {
+            // TODO fix user handle to be the same for all registered credentials and save in user entity
             CredentialRegistrationResultDto result = webAuthnAuthenticator.finishRegistration(requestId, publicKeyCredentialJson);
 
             User user = User.builder()
