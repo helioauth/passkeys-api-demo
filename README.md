@@ -66,6 +66,8 @@
 <!-- About the Project -->
 ## :star2: About the Project
 
+An example implementation of WebAuthn passkey authentication in a Spring Boot application.
+
 <div align="center"> 
   <img src="src/main/resources/static/img/passkey-demo-pixel.png" height="600" alt="screenshot" />
 </div>
@@ -180,7 +182,5 @@ Project Link: [https://github.com/helioauth/passkeys-api-demo](https://github.co
 
 <!-- Acknowledgments -->
 ## :gem: Acknowledgements
-
-Use this section to mention useful resources and libraries that you have used in your projects.
 
 - [java-webauthn-server by Yubico](https://github.com/Yubico/java-webauthn-server)
