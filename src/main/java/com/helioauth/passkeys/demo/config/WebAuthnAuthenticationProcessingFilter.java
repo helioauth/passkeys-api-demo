@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/signin-validate-key", "POST");
+    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/v1/credentials/signin/finish", "POST");
 
     public WebAuthnAuthenticationProcessingFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);

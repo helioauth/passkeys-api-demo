@@ -35,8 +35,7 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/create-credential", "/register-credential").permitAll()
-                        .requestMatchers("/signin-credential-options", "/signin-validate-key").permitAll()
+                        .requestMatchers("/v1/credentials/signin/**", "/v1/credentials/signup/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
