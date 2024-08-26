@@ -4,13 +4,26 @@ import jdenticon from "jdenticon/standalone";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
+const API_PREFIX = "/v1/credentials";
+
+const API_PATHS = {
+    SIGNUP_CREATE: `${API_PREFIX}/signup/start`,
+    SIGNUP_FINISH: `${API_PREFIX}/signup/finish`,
+
+    SIGNIN_START: `${API_PREFIX}/signin/start`,
+    SIGNIN_FINISH: `${API_PREFIX}/signin/finish`,
+
+    CREDENTIALS_ADD_START: `${API_PREFIX}/add/start`,
+    CREDENTIALS_ADD_FINISH: `${API_PREFIX}/add/finish`
+};
+
 async function signUpWithPasskey() {
     const email = document.getElementById("email").value;
 
     try {
         const createCredentialResponse = await createCredential(email);
 
-        const registrationResponse = await fetchPostAsJson("/register-credential",
+        const registrationResponse = await fetchPostAsJson(API_PATHS.SIGNUP_FINISH,
             {
                 requestId: createCredentialResponse.requestId,
                 publicKeyCredential: JSON.stringify(createCredentialResponse.publicKeyCredential)
@@ -32,7 +45,7 @@ async function signUpWithPasskey() {
 async function createCredential(name) {
     try {
         const credentialCreateOptions = await fetchPostAsJson(
-            "/create-credential",
+            API_PATHS.SIGNUP_CREATE,
             {name}
         );
         const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
@@ -78,21 +91,16 @@ async function signInWithPasskey() {
     const email = document.getElementById("email").value;
 
     try {
-        const optionsResponse = await fetchPostAsJson("/signin-credential-options", {
+        const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {
             name: email
         });
 
         const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.credentialsGetOptions));
 
-        const signinResponse = await fetchPostAsJson("/signin-validate-key", {
+        const signinResponse = await fetchPostAsJson(API_PATHS.SIGNIN_FINISH, {
             requestId: optionsResponse.requestId,
             publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
         });
-
-        // document.getElementById("success-message").innerText = "Welcome " + signinResponse.username + "!";
-        // document.getElementById("success-message").classList.remove("d-none");
-
-
 
     } catch (response) {
         // TODO fix error handling
@@ -135,6 +143,40 @@ function signUpFormValidate(event) {
     }
 }
 
+async function addPasskeyAction() {
+    const successMessage = document.getElementById("success-message");
+    const errorMessage = document.getElementById("error-message");
+
+    successMessage.classList.add("d-none");
+    errorMessage.classList.add("d-none");
+
+    try {
+        const credentialCreateOptions = await fetchPostAsJson(
+            API_PATHS.CREDENTIALS_ADD_START,
+            {}
+        );
+        const cco = parseCreationOptionsFromJSON(JSON.parse(credentialCreateOptions.publicKeyCredentialCreationOptions));
+        const publicKeyCredential = await create(cco);
+
+        const registrationResponse = await fetchPostAsJson(API_PATHS.CREDENTIALS_ADD_FINISH,
+            {
+                requestId: credentialCreateOptions.requestId,
+                publicKeyCredential: JSON.stringify(publicKeyCredential.toJSON())
+            }
+        );
+
+        if (registrationResponse.requestId === createCredentialResponse.requestId) {
+            successMessage.innerText = "New passkey added successfully!"
+            successMessage.classList.remove("d-none");
+        }
+    } catch (e) {
+        successMessage.classList.add("d-none");
+        errorMessage.innerText = "Something went wrong!"
+        errorMessage.classList.remove("d-none");
+        // throw new Error("Oops, something went wrong");
+    }
+}
+
 window.addEventListener("load", () => {
     const signUpForm = document.getElementById("signup-form");
     if (signUpForm !== null) {
@@ -145,5 +187,10 @@ window.addEventListener("load", () => {
     dayjs.extend(relativeTime);
     for (const dateElement of document.getElementsByClassName("time-ago")) {
         dateElement.innerHTML = dayjs(dateElement.getAttribute("data-date")).fromNow();
+    }
+
+    const addPasskeyButton = document.getElementById("add-passkey-button");
+    if (addPasskeyButton !== null) {
+        addPasskeyButton.addEventListener("click", addPasskeyAction);
     }
 });
