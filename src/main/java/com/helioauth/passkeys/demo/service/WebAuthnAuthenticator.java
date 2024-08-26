@@ -18,9 +18,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 @Slf4j
 @Service
@@ -29,8 +31,10 @@ public class WebAuthnAuthenticator {
 
     private final RelyingParty relyingParty;
 
-    // TODO Expire cached requests
-    private final Map<String, String> cache = new HashMap<>();
+    private final Cache<String, String> cache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .maximumSize(1000)
+            .build();
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -58,7 +62,7 @@ public class WebAuthnAuthenticator {
         );
 
         String requestId = id.getHex();
-        cache.putIfAbsent(requestId, request.toJson());
+        cache.put(requestId, request.toJson());
 
         return CreateCredentialResponse.builder()
                 .requestId(requestId)
@@ -70,11 +74,11 @@ public class WebAuthnAuthenticator {
         PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> pkc =
                 PublicKeyCredential.parseRegistrationResponseJson(publicKeyCredentialJson);
 
-        String requestJson = cache.get(requestId);
+        String requestJson = cache.getIfPresent(requestId);
         if (requestJson == null) {
             throw new SignUpFailedException();
         }
-        cache.remove(requestId);
+        cache.invalidate(requestId);
 
         try {
             PublicKeyCredentialCreationOptions request = PublicKeyCredentialCreationOptions.fromJson(requestJson);
@@ -97,18 +101,18 @@ public class WebAuthnAuthenticator {
                 .build());
 
         String requestId = generateRandom(32).getHex();
-        cache.putIfAbsent(requestId, request.toJson());
+        cache.put(requestId, request.toJson());
 
         return new StartAssertionResponse(requestId, request.toCredentialsGetJson());
     }
 
     public CredentialAssertionResultDto finishAssertion(String requestId, String publicKeyCredentialJson) throws IOException {
-        String requestJson = cache.get(requestId);
+        String requestJson = cache.getIfPresent(requestId);
         if (requestJson == null) {
             log.error("Request id {} not found in cache", requestId);
             throw new SignInFailedException();
         }
-        cache.remove(requestId);
+        cache.invalidate(requestId);
 
         try {
             PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> pkc =
