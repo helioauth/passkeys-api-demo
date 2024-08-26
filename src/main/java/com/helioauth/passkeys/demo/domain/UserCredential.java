@@ -26,6 +26,9 @@ public class UserCredential {
     private String userHandle;
 
     @Column
+    private String displayName;
+
+    @Column
     private Long signatureCount;
 
     @Column(columnDefinition = "text")
