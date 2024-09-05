@@ -6,6 +6,5 @@ services:
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: demodb
-      POSTGRES_DB: demodb
     ports:
-      - 5432:5432
+      - 5433:5432

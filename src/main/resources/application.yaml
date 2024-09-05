@@ -11,3 +11,6 @@ relyingparty:
   display-name: LocalHost
   hostname: localhost
   allow-origin-port: false
+
+passkeys-api:
+  uri: http://api.helioauth.com/
