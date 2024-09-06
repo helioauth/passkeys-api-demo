@@ -38,7 +38,7 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/v1/credentials/signin/**", "/v1/credentials/signup/**").permitAll()
+                        .requestMatchers("/signin/**", "/signup/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
