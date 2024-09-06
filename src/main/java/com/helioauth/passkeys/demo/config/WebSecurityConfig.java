@@ -1,7 +1,10 @@
 package com.helioauth.passkeys.demo.config;
 
+import com.helioauth.passkeys.demo.client.DefaultPasskeysApiClient;
+import com.helioauth.passkeys.demo.client.PasskeysApiClient;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationProvider;
 import com.helioauth.passkeys.demo.service.UserSignInService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -94,4 +97,8 @@ public class WebSecurityConfig {
         return filter;
     }
 
+    @Bean
+    public PasskeysApiClient passkeysApiClient (@Value("${passkeys-api.uri}") String passkeysApiUri){
+        return new DefaultPasskeysApiClient(passkeysApiUri);
+    }
 }
