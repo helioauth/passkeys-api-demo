@@ -2,6 +2,7 @@ package com.helioauth.passkeys.demo.controller;
 
 import com.helioauth.passkeys.demo.client.PasskeysApiClient;
 import com.helioauth.passkeys.demo.client.SignUpFinishRequest;
+import com.helioauth.passkeys.demo.contract.SignUpRequest;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +42,10 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> signup(@RequestBody SignUpFinishRequest signupFinishRequest) {
-        passkeysApiClient.signUpFinish(signupFinishRequest);
-        return ResponseEntity.ok(Map.of("requestId", signupFinishRequest.requestId()));
+    public ResponseEntity<Map<String, String>> signup(@RequestBody @Valid SignUpRequest request) {
+        passkeysApiClient.signUpFinish(
+            new SignUpFinishRequest(request.requestId(), request.publicKeyCredential())
+        );
+        return ResponseEntity.ok(Map.of("requestId", request.requestId()));
     }
 }
