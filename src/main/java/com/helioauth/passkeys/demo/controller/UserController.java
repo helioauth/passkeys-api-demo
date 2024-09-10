@@ -1,11 +1,15 @@
 package com.helioauth.passkeys.demo.controller;
 
+import com.helioauth.passkeys.demo.client.PasskeyApiException;
 import com.helioauth.passkeys.demo.client.PasskeysApiClient;
 import com.helioauth.passkeys.demo.client.SignUpFinishRequest;
 import com.helioauth.passkeys.demo.contract.SignUpRequest;
+import com.helioauth.passkeys.demo.domain.User;
 import com.helioauth.passkeys.demo.domain.UserCredential;
 import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
+import com.helioauth.passkeys.demo.domain.UserRepository;
 import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
+import com.helioauth.passkeys.demo.service.exception.UsernameAlreadyRegisteredException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,7 @@ public class UserController {
 
     private final UserCredentialMapper userCredentialMapper;
     private final PasskeysApiClient passkeysApiClient;
+    private final UserRepository userRepository;
 
     @GetMapping("/")
     public String dashboard(Authentication user, Model model) {
@@ -43,9 +48,26 @@ public class UserController {
     @ResponseBody
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signup(@RequestBody @Valid SignUpRequest request) {
-        passkeysApiClient.signUpFinish(
-            new SignUpFinishRequest(request.requestId(), request.publicKeyCredential())
-        );
-        return ResponseEntity.ok(Map.of("requestId", request.requestId()));
+        userRepository.findByName(request.email()).ifPresent(user -> {
+            throw new UsernameAlreadyRegisteredException();
+        });
+
+        try {
+            passkeysApiClient.signUpFinish(
+                new SignUpFinishRequest(request.requestId(), request.publicKeyCredential())
+            );
+
+            User newUser = User.builder()
+                .name(request.email())
+                .displayName(request.displayName())
+                .build();
+            userRepository.save(newUser);
+
+            return ResponseEntity.ok(Map.of("requestId", request.requestId()));
+        } catch (PasskeyApiException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
