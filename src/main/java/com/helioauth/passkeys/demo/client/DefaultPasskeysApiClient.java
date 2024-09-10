@@ -30,12 +30,8 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
     }
 
     @Override
-    public void signInFinish(SignInFinishRequest request) {
-        try {
-            post(objectMapper.writeValueAsString(request), SIGNIN_FINISH_ENDPOINT);
-        } catch (JsonProcessingException e) {
-            throw new PasskeyApiException(e.getMessage(), e);
-        }
+    public void signInFinish(SignInFinishRequest request) throws IOException {
+        post(objectMapper.writeValueAsString(request), SIGNIN_FINISH_ENDPOINT);
     }
 
     private void post(String json, String endpoint) {
