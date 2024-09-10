@@ -1,6 +1,5 @@
 package com.helioauth.passkeys.demo.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import okhttp3.*;
 import okhttp3.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,11 +20,11 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
     }
 
     @Override
-    public void signUpFinish(SignUpFinishRequest request) {
-        try {
-            post(objectMapper.writeValueAsString(request), SIGNUP_FINISH_ENDPOINT);
-        } catch (JsonProcessingException e) {
-            throw new PasskeyApiException(e.getMessage(), e);
+    public SignUpFinishResponse signUpFinish(SignUpFinishRequest request) throws IOException {
+        try (var response = post(objectMapper.writeValueAsString(request), SIGNUP_FINISH_ENDPOINT)) {
+            try (ResponseBody responseBody = response.body()) {
+                return objectMapper.readValue(responseBody.string(), SignUpFinishResponse.class);
+            }
         }
     }
 
