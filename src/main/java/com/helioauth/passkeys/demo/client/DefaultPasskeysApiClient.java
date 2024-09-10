@@ -34,20 +34,21 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
         post(objectMapper.writeValueAsString(request), SIGNIN_FINISH_ENDPOINT);
     }
 
-    private void post(String json, String endpoint) {
-        try {
-            RequestBody body = RequestBody.create(json, JSON);
+    private Response post(String json, String endpoint) throws IOException {
+        RequestBody body = RequestBody.create(json, JSON);
 
-            Request request = new Request.Builder()
-                .url(apiUrl + endpoint)
-                .post(body)
-                .build();
+        Request request = new Request.Builder()
+            .url(apiUrl + endpoint)
+            .post(body)
+            .build();
 
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) throw new PasskeyApiException("Unexpected code " + response);
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                // TODO error handling
+                throw new PasskeyApiException("Unexpected code %d %s".formatted(response.code(), response.message()));
             }
-        } catch (IOException e) {
-            throw new PasskeyApiException(e.getMessage(), e);
+
+            return response;
         }
     }
 }
