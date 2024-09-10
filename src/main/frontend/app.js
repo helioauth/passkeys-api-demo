@@ -19,12 +19,13 @@ const API_PATHS = {
 };
 
 async function signUpWithPasskey() {
-    const name = document.getElementById("email").value;
+    const displayName = document.getElementById("displayName").value;
+    const email = document.getElementById("email").value;
 
     try {
         const signUpResponse = await fetchPostAsJson(
             API_PATHS.SIGNUP_START,
-            {name}
+            {name: email}
         );
 
         const credentialCreationOptions = parseCreationOptionsFromJSON(signUpResponse.options);
@@ -34,7 +35,9 @@ async function signUpWithPasskey() {
         await fetchPostAsJson(API_PATHS.SIGNUP_FINISH,
             {
                 requestId: signUpResponse.requestId,
-                publicKeyCredential: JSON.stringify(publicKeyCredential)
+                publicKeyCredential: JSON.stringify(publicKeyCredential),
+                displayName,
+                email
             }
         );
 
