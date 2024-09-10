@@ -27,6 +27,9 @@ public class User {
     @Column
     private String displayName;
 
+    @Column
+    private UUID externalId;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCredential> userCredentials;
 

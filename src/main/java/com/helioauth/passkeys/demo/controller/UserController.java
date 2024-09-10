@@ -53,13 +53,14 @@ public class UserController {
         });
 
         try {
-            passkeysApiClient.signUpFinish(
+            var response = passkeysApiClient.signUpFinish(
                 new SignUpFinishRequest(request.requestId(), request.publicKeyCredential())
             );
 
             User newUser = User.builder()
                 .name(request.email())
                 .displayName(request.displayName())
+                .externalId(response.userId())
                 .build();
             userRepository.save(newUser);
 
