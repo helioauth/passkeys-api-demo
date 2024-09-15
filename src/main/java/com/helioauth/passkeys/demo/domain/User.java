@@ -28,6 +28,12 @@ public class User {
     private String displayName;
 
     @Column
+    private String password;
+
+    @Column
+    private Boolean enabled;
+
+    @Column
     private UUID externalId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
