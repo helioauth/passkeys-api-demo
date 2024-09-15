@@ -66,8 +66,10 @@ public class UserController {
 
             return ResponseEntity.ok(Map.of("requestId", request.requestId()));
         } catch (PasskeyApiException e) {
+            log.error("Passkeys API error", e);
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+            log.error("Error during signup", e);
             return ResponseEntity.internalServerError().build();
         }
     }
