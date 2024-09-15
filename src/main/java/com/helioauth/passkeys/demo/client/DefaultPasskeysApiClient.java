@@ -21,11 +21,8 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
 
     @Override
     public SignUpFinishResponse signUpFinish(SignUpFinishRequest request) throws IOException {
-        try (var response = post(objectMapper.writeValueAsString(request), SIGNUP_FINISH_ENDPOINT)) {
-            try (ResponseBody responseBody = response.body()) {
-                return objectMapper.readValue(responseBody.string(), SignUpFinishResponse.class);
-            }
-        }
+        var response = post(objectMapper.writeValueAsString(request), SIGNUP_FINISH_ENDPOINT);
+        return objectMapper.readValue(response, SignUpFinishResponse.class);
     }
 
     @Override
@@ -33,7 +30,7 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
         post(objectMapper.writeValueAsString(request), SIGNIN_FINISH_ENDPOINT);
     }
 
-    private Response post(String json, String endpoint) throws IOException {
+    private String post(String json, String endpoint) throws IOException {
         RequestBody body = RequestBody.create(json, JSON);
 
         Request request = new Request.Builder()
@@ -43,11 +40,10 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                // TODO error handling
                 throw new PasskeyApiException("Unexpected code %d %s".formatted(response.code(), response.message()));
             }
 
-            return response;
+            return response.body().string();
         }
     }
 }
