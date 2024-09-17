@@ -12,7 +12,7 @@ const API_PATHS = {
     SIGNUP_FINISH: `/signup`,
 
     SIGNIN_START: `${API_PREFIX}/signin/start`,
-    SIGNIN_FINISH: `/signin`,
+    SIGNIN_FINISH: `/login`,
 
     CREDENTIALS_ADD_START: `${API_PREFIX}/credentials/add/start`,
     CREDENTIALS_ADD_FINISH: `${API_PREFIX}/credentials/add/finish`
@@ -57,14 +57,14 @@ async function signUpWithPasskey() {
 }
 
 async function signInWithPasskey() {
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("signin-email").value;
 
     try {
         const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {
             name: email
         });
 
-        const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.credentialsGetOptions));
+        const publicKeyCredential = await webauthnJson.get(optionsResponse.options);
 
         await fetchPostAsJson(API_PATHS.SIGNIN_FINISH, {
             requestId: optionsResponse.requestId,
@@ -77,8 +77,7 @@ async function signInWithPasskey() {
             window.location.replace(response.url);
         } else if (response.status >= 400 && response.status <= 499) {
             const errorDetails = await response.json();
-            document.getElementById("email-invalid-message").innerText = (errorDetails.message ?? "Invalid email address");
-            document.getElementById("email").classList.add("is-invalid");
+            showErrorMessage(errorDetails.message ?? "Invalid email address");
         } else if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
             showErrorMessage("Authentication cancelled.");
         } else if (response.message !== null) {
@@ -141,6 +140,11 @@ window.addEventListener("load", () => {
     const signUpForm = document.getElementById("signup-form");
     if (signUpForm !== null) {
         signUpForm.addEventListener("submit", signUpFormValidate)
+    }
+
+    const signInForm = document.getElementById("signin-form");
+    if (signInForm !== null) {
+        signInForm.addEventListener("submit", signUpFormValidate)
     }
 
     jdenticon();
