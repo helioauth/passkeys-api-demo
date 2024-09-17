@@ -19,7 +19,10 @@
 
     <main class="bg-body-tertiary shadow-sm mx-auto p-4" style="border-radius: 21px">
         <div class="px-3 my-3">
-            <div class="fs-3 fw-light py-2">Welcome <span sec:authentication="name"></span></div>
+            <div class="fs-3 fw-light py-2">
+                Welcome <span sec:authentication="principal.displayName"></span>
+                <span class="fs-5 fw-light">(<span sec:authentication="principal.name"></span>)</span>
+            </div>
             <p class="fs-5 fw-light">This is a list of the passkeys associated with your account.</p>
         </div>
 
