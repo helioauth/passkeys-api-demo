@@ -35,14 +35,20 @@
                     <label for="displayName">Your name</label>
                 </div>
                 <div class="mb-3 form-floating">
-                    <input type="email" class="form-control" required="required" id="email" name="email" placeholder="name@example.com" autocomplete="username webauthn">
+                    <input type="email" class="form-control" required="required" id="email" name="email" placeholder="name@example.com">
                     <label for="email">Email address</label>
                     <div id="email-invalid-message" class="invalid-feedback"></div>
                 </div>
                 <button id="signup-button" type="submit" class="btn btn-primary w-100 py-2">Sign up</button>
+            </form>
 
-                <p class="text-center w-100 my-3">or</p>
+            <hr class="m-4" />
 
+            <form id="signin-form">
+                <div class="mb-3 form-floating">
+                    <input type="email" class="form-control" required="required" id="signin-email" name="email" placeholder="name@example.com" autocomplete="username webauthn">
+                    <label for="signin-email">Email address</label>
+                </div>
                 <button id="signin-button" type="submit" class="btn btn-secondary w-100 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-key" viewBox="0 0 16 16">
                         <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5"/>
