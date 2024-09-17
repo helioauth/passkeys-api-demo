@@ -11,7 +11,7 @@ public class PasskeyAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String name;
 
-    private final SignInValidateKeyRequest credentials;
+    private SignInValidateKeyRequest signInRequest;
 
     public PasskeyAuthenticationToken(String name, SignInValidateKeyRequest credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
@@ -21,16 +21,17 @@ public class PasskeyAuthenticationToken extends AbstractAuthenticationToken {
         setAuthenticated(true);
     }
 
-    public PasskeyAuthenticationToken(String name, SignInValidateKeyRequest credentials) {
+    public PasskeyAuthenticationToken(SignInValidateKeyRequest request) {
         super(null);
 
-        this.name = name;
-        this.credentials = credentials;
+        this.signInRequest = request;
         setAuthenticated(false);
     }
 
-    public static Authentication unauthenticated(String principal, SignInValidateKeyRequest credentials) {
-        return new PasskeyAuthenticationToken(principal, credentials);
+    public static Authentication unauthenticated(SignInValidateKeyRequest request) {
+        return new PasskeyAuthenticationToken(request);
+    }
+
     }
 
     @Override

@@ -13,10 +13,9 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
-import java.util.Collections;
 
 public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/signin", "POST");
+    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
 
     public WebAuthnAuthenticationProcessingFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
@@ -35,11 +34,9 @@ public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticati
             throw new BadCredentialsException("Unable to parse request body", e);
         }
 
-        PasskeyAuthenticationToken authRequest = new PasskeyAuthenticationToken(
-                signInValidateKeyRequest.getRequestId(),
-                signInValidateKeyRequest,
-                Collections.emptyList()
-        );
-        return this.getAuthenticationManager().authenticate(authRequest);
+        return this.getAuthenticationManager()
+            .authenticate(
+                PasskeyAuthenticationToken.unauthenticated(signInValidateKeyRequest)
+            );
     }
 }
