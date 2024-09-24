@@ -15,11 +15,12 @@ public class DefaultPasskeysApiClient implements PasskeysApiClient {
 
     private final OkHttpClient client = new OkHttpClient();
     private final String apiUrl;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-    public DefaultPasskeysApiClient(String apiUrl) {
+    public DefaultPasskeysApiClient(String apiUrl, ObjectMapper objectMapper) {
         this.apiUrl = apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
+        this.objectMapper = objectMapper;
     }
 
     @Override

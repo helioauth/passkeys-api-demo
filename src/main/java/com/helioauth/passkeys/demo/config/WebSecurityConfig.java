@@ -1,5 +1,6 @@
 package com.helioauth.passkeys.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helioauth.passkeys.demo.client.DefaultPasskeysApiClient;
 import com.helioauth.passkeys.demo.client.PasskeysApiClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,7 +78,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public PasskeysApiClient passkeysApiClient (@Value("${passkeys-api.uri}") String passkeysApiUri){
-        return new DefaultPasskeysApiClient(passkeysApiUri);
+    public PasskeysApiClient passkeysApiClient (
+        @Value("${passkeys-api.uri}") String passkeysApiUri,
+        ObjectMapper objectMapper
+        ){
+        return new DefaultPasskeysApiClient(passkeysApiUri, objectMapper);
     }
 }
