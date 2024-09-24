@@ -47,4 +47,8 @@ public class PasskeyAuthenticationToken extends AbstractAuthenticationToken {
     public Object getPrincipal() {
         return user;
     }
+
+    public User getUser() {
+        return user;
+    }
 }
