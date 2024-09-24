@@ -41,6 +41,8 @@ async function signUpWithPasskey() {
             }
         );
 
+        document.getElementById("signin-email").value = email;
+
         showSuccessMessage("Thanks for signing up! You can sign in with your passkey below.");
     } catch (response) {
         if (response.status >= 400 && response.status <= 499) {

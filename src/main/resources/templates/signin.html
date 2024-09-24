@@ -23,11 +23,8 @@
             </div>
 
             <div class="container mb-4 text-center">
-                <p>After signing up you'll be able to see your passkeys and manage your account.</p>
+                <p>Signup with your email and passkey</p>
             </div>
-
-            <div id="error-message" class="d-none alert alert-danger" role="alert"> </div>
-            <div id="success-message" class="d-none alert alert-success" role="alert"> </div>
 
             <form id="signup-form">
                 <div class="mb-3 form-floating">
@@ -41,9 +38,17 @@
                 </div>
                 <button id="signup-button" type="submit" class="btn btn-primary w-100 py-2">Sign up</button>
             </form>
+        </div>
 
-            <hr class="m-4" />
+        <div class="my-4">
+            <div id="error-message" class="d-none alert alert-danger" role="alert"> alert </div>
+            <div id="success-message" class="d-none alert alert-success" role="alert"> success </div>
+        </div>
 
+        <div class="bg-body-tertiary shadow-sm p-4" style="border-radius: 21px">
+            <div class="container mb-4 text-center">
+                <p>After signing in you'll be able to see your passkeys and manage your account</p>
+            </div>
             <form id="signin-form">
                 <div class="mb-3 form-floating">
                     <input type="email" class="form-control" required="required" id="signin-email" name="email" placeholder="name@example.com" autocomplete="username webauthn">
@@ -57,31 +62,8 @@
                     Sign in with your passkey
                 </button>
             </form>
-            <p class="text-center mt-3 fw-light fst-italic">Demo accounts are deleted weekly.</p>
         </div>
-
-<!--/*        <hr class="m-4"/>
-
-        <div class="bg-body-tertiary shadow-sm mx-auto p-4" style="border-radius: 21px">
-            <h1 class="fw-light fs-5 text-center mb-4">Legacy username and password login</h1>
-
-            <form th:action="@{/signin}" method="post">
-                <div class="mb-3 form-floating">
-                    <input type="text" class="form-control" id="username" name="username" required="required" placeholder="">
-                    <label for="username">Username</label>
-                </div>
-
-                <div class="mb-3 form-floating">
-                    <input type="password" class="form-control" id="password" name="password" required="required" placeholder="">
-                    <label for="password">Password</label>
-                </div>
-
-                <div class="text-center">
-                    <button class="btn btn-outline-secondary w-50 py-2" type="submit">Sign in</button>
-                </div>
-            </form>
-        </div>
-*/-->
+        <p class="text-center mt-3 fw-light fst-italic">Demo accounts are deleted weekly.</p>
     </main>
 <div th:replace="~{fragment-footer :: footer}"></div>
 </body>
