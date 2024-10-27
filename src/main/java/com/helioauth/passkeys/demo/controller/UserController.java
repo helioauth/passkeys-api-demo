@@ -1,14 +1,11 @@
 package com.helioauth.passkeys.demo.controller;
 
-import com.helioauth.passkeys.demo.client.ListPasskeysResponse;
 import com.helioauth.passkeys.demo.client.PasskeyApiException;
 import com.helioauth.passkeys.demo.client.PasskeysApiClient;
 import com.helioauth.passkeys.demo.client.SignUpFinishRequest;
 import com.helioauth.passkeys.demo.contract.SignUpRequest;
 import com.helioauth.passkeys.demo.domain.User;
-import com.helioauth.passkeys.demo.domain.UserCredentialRepository;
 import com.helioauth.passkeys.demo.domain.UserRepository;
-import com.helioauth.passkeys.demo.mapper.UserCredentialMapper;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationToken;
 import com.helioauth.passkeys.demo.service.exception.UsernameAlreadyRegisteredException;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +28,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserCredentialRepository userCredentialRepository;
-
-    private final UserCredentialMapper userCredentialMapper;
     private final PasskeysApiClient passkeysApiClient;
     private final UserRepository userRepository;
 
