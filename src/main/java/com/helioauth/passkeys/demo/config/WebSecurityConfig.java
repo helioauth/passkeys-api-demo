@@ -67,12 +67,14 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public WebAuthnAuthenticationProcessingFilter webAuthnFilter(AuthenticationManager authenticationManager) {
+    public WebAuthnAuthenticationProcessingFilter webAuthnFilter(AuthenticationManager authenticationManager,
+                                                                 ObjectMapper objectMapper) {
         WebAuthnAuthenticationProcessingFilter filter = new WebAuthnAuthenticationProcessingFilter();
         filter.setAuthenticationManager(authenticationManager);
         filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
         filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
         filter.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy());
+        filter.setObjectMapper(objectMapper);
 
         return filter;
     }
