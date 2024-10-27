@@ -36,9 +36,6 @@ public class User {
     @Column
     private UUID externalId;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCredential> userCredentials;
-
     protected User() {
 
     }
