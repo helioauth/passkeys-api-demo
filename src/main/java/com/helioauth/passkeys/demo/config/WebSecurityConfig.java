@@ -3,6 +3,8 @@ package com.helioauth.passkeys.demo.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helioauth.passkeys.demo.client.DefaultPasskeysApiClient;
 import com.helioauth.passkeys.demo.client.PasskeysApiClient;
+import com.helioauth.passkeys.demo.domain.UserRepository;
+import com.helioauth.passkeys.demo.service.PasskeyAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,10 +57,16 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    @Deprecated
     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         return provider;
+    }
+
+    @Bean
+    public AuthenticationProvider passkeysAuthenticationProvider(UserRepository userRepository, PasskeysApiClient passkeysApiClient) {
+        return new PasskeyAuthenticationProvider(userRepository, passkeysApiClient);
     }
 
     @Bean
@@ -80,10 +88,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public PasskeysApiClient passkeysApiClient (
-        @Value("${passkeys-api.uri}") String passkeysApiUri,
-        ObjectMapper objectMapper
-        ){
+    public PasskeysApiClient passkeysApiClient (@Value("${passkeys-api.uri}") String passkeysApiUri,
+                                                ObjectMapper objectMapper) {
         return new DefaultPasskeysApiClient(passkeysApiUri, objectMapper);
     }
 }
