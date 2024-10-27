@@ -16,9 +16,6 @@ spring:
       cache:
         period: 0
 
-relyingparty:
-  allow-origin-port: true
-
 passkeys-api:
   uri: http://localhost:8080/
 
