@@ -1,11 +1,9 @@
 spring:
   application:
     name: demo
-  datasource:
-    url: ${DATABASE_URL}
   jpa:
     hibernate:
       ddl-auto: update
 
 passkeys-api:
-  uri: http://api.helioauth.com/
+  uri: https://api.helioauth.com/
