@@ -4,7 +4,7 @@ import jdenticon from "jdenticon/standalone";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-const API_DOMAIN = "http://localhost:8080";
+const API_DOMAIN = window.helioauth_demo.API_URL ?? "http://localhost:8080";
 const API_PREFIX = `${API_DOMAIN}/v1`;
 
 const API_PATHS = {
