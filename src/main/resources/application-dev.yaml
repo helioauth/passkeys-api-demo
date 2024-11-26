@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/demodb
+    url: jdbc:postgresql://localhost:5433/demodb
     username: demodb
     password: password
 
@@ -16,5 +16,12 @@ spring:
       cache:
         period: 0
 
-relyingparty:
-  allow-origin-port: true
+passkeys-api:
+  uri: http://localhost:8080/
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+server:
+  port: 8081

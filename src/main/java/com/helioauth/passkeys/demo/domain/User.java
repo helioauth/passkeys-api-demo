@@ -27,8 +27,14 @@ public class User {
     @Column
     private String displayName;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCredential> userCredentials;
+    @Column
+    private String password;
+
+    @Column
+    private Boolean enabled;
+
+    @Column
+    private UUID externalId;
 
     protected User() {
 

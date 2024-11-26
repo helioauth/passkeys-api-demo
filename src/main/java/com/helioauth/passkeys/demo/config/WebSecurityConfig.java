@@ -1,7 +1,11 @@
 package com.helioauth.passkeys.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helioauth.passkeys.demo.client.DefaultPasskeysApiClient;
+import com.helioauth.passkeys.demo.client.PasskeysApiClient;
+import com.helioauth.passkeys.demo.domain.UserRepository;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationProvider;
-import com.helioauth.passkeys.demo.service.UserSignInService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,10 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -35,7 +36,7 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/v1/credentials/signin/**", "/v1/credentials/signup/**").permitAll()
+                        .requestMatchers("/signin/**", "/signup/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
@@ -56,26 +57,16 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user")
-                .password("Throwing3-Backspin-Divisive-Grouped")
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
-    public PasskeyAuthenticationProvider passkeyAuthenticationProvider(UserSignInService userSignInService) {
-        return new PasskeyAuthenticationProvider(userSignInService);
-    }
-
-    @Bean
+    @Deprecated
     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         return provider;
+    }
+
+    @Bean
+    public AuthenticationProvider passkeysAuthenticationProvider(UserRepository userRepository, PasskeysApiClient passkeysApiClient) {
+        return new PasskeyAuthenticationProvider(userRepository, passkeysApiClient);
     }
 
     @Bean
@@ -84,14 +75,21 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public WebAuthnAuthenticationProcessingFilter webAuthnFilter(AuthenticationManager authenticationManager) {
+    public WebAuthnAuthenticationProcessingFilter webAuthnFilter(AuthenticationManager authenticationManager,
+                                                                 ObjectMapper objectMapper) {
         WebAuthnAuthenticationProcessingFilter filter = new WebAuthnAuthenticationProcessingFilter();
         filter.setAuthenticationManager(authenticationManager);
         filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
         filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
         filter.setSecurityContextHolderStrategy(SecurityContextHolder.getContextHolderStrategy());
+        filter.setObjectMapper(objectMapper);
 
         return filter;
     }
 
+    @Bean
+    public PasskeysApiClient passkeysApiClient (@Value("${passkeys-api.uri}") String passkeysApiUri,
+                                                ObjectMapper objectMapper) {
+        return new DefaultPasskeysApiClient(passkeysApiUri, objectMapper);
+    }
 }

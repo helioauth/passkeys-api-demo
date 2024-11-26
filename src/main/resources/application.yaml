@@ -1,13 +1,9 @@
 spring:
   application:
     name: demo
-  datasource:
-    url: ${DATABASE_URL}
   jpa:
     hibernate:
       ddl-auto: update
 
-relyingparty:
-  display-name: LocalHost
-  hostname: localhost
-  allow-origin-port: false
+passkeys-api:
+  uri: https://api.helioauth.com/

@@ -5,6 +5,8 @@ import com.helioauth.passkeys.demo.contract.SignInValidateKeyRequest;
 import com.helioauth.passkeys.demo.service.PasskeyAuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -13,10 +15,12 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
-import java.util.Collections;
 
+@Setter
 public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/v1/credentials/signin/finish", "POST");
+    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public WebAuthnAuthenticationProcessingFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
@@ -30,16 +34,14 @@ public class WebAuthnAuthenticationProcessingFilter extends AbstractAuthenticati
 
         SignInValidateKeyRequest signInValidateKeyRequest;
         try {
-            signInValidateKeyRequest = (new ObjectMapper()).readValue(request.getReader(), SignInValidateKeyRequest.class);
+            signInValidateKeyRequest = objectMapper.readValue(request.getReader(), SignInValidateKeyRequest.class);
         } catch (IOException e) {
             throw new BadCredentialsException("Unable to parse request body", e);
         }
 
-        PasskeyAuthenticationToken authRequest = new PasskeyAuthenticationToken(
-                signInValidateKeyRequest.getRequestId(),
-                signInValidateKeyRequest,
-                Collections.emptyList()
-        );
-        return this.getAuthenticationManager().authenticate(authRequest);
+        return this.getAuthenticationManager()
+            .authenticate(
+                PasskeyAuthenticationToken.unauthenticated(signInValidateKeyRequest)
+            );
     }
 }

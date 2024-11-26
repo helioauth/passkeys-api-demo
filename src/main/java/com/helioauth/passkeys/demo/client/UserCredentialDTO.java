@@ -1,9 +1,8 @@
-package com.helioauth.passkeys.demo.service.dto;
+package com.helioauth.passkeys.demo.client;
 
 import java.time.Instant;
 
 public record UserCredentialDTO(
-    String credentialId,
     String userHandle,
     Long signatureCount,
     String displayName,

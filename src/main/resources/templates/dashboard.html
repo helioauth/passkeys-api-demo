@@ -19,7 +19,10 @@
 
     <main class="bg-body-tertiary shadow-sm mx-auto p-4" style="border-radius: 21px">
         <div class="px-3 my-3">
-            <div class="fs-3 fw-light py-2">Welcome <span sec:authentication="name"></span></div>
+            <div class="fs-3 fw-light py-2">
+                Welcome <span sec:authentication="principal.displayName"></span>
+                <span class="fs-5 fw-light">(<span sec:authentication="principal.name"></span>)</span>
+            </div>
             <p class="fs-5 fw-light">This is a list of the passkeys associated with your account.</p>
         </div>
 
@@ -29,21 +32,17 @@
         <div class="d-flex flex-column flex-md-row p-2 gap-4 py-md-5 align-items-center justify-content-center">
             <div class="list-group">
                 <a th:each="passkey : ${passkeys}" href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
-                    <svg class="rounded-circle flex-shrink-0" width="32" height="32" th:data-jdenticon-value="${passkey.credentialId()}"></svg>
-                    <div class="d-flex gap-2 w-100 justify-content-between">
-                        <div>
-                            <h6 class="mb-0" th:text="${passkey.displayName()}"></h6>
-                            <p class="mb-0 opacity-75 text-break" th:text="${passkey.credentialId()}"></p>
-                            <p> Created: <small class="opacity-50 text-nowrap time-ago" th:data-date="${#temporals.format(passkey.createdAt(), 'yyyy-MM-dd HH:mm:ss zZ', 'UTC')}"></small></p>
-                            <p> Last used: <small class="opacity-50 text-nowrap time-ago" th:data-date="${#temporals.format(passkey.lastUsedAt(), 'yyyy-MM-dd HH:mm:ss zZ', 'UTC')}"></small></p>
-                        </div>
+                    <svg class="rounded-circle flex-shrink-0" width="32" height="32" th:data-jdenticon-value="${passkey.displayName()}"></svg>
+                    <div class="d-flex flex-column gap-2 w-100 justify-content-between">
+                            <h6 class="my-2" th:text="${passkey.displayName()}"></h6>
+                            <p class="my-auto"> Created: <small class="opacity-50 text-nowrap time-ago" th:data-date="${#temporals.format(passkey.createdAt(), 'yyyy-MM-dd HH:mm:ss zZ', 'UTC')}"></small></p>
+                            <p class="my-auto"> Last used: <small class="opacity-50 text-nowrap time-ago" th:data-date="${#temporals.format(passkey.lastUsedAt(), 'yyyy-MM-dd HH:mm:ss zZ', 'UTC')}"></small></p>
                     </div>
                 </a>
-
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row mb-4 justify-content-center">
+        <div class="d-flex flex-column flex-md-row my-4 justify-content-center">
             <button id="add-passkey-button" class="btn btn-primary">Add passkey</button>
         </div>
 
