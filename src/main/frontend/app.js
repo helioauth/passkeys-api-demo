@@ -116,9 +116,10 @@ async function addPasskeyAction() {
     hideErrorMessage();
 
     try {
+        const name = prompt("Enter a name for your passkey");
         const startResponse = await fetchPostAsJson(
             API_PATHS.CREDENTIALS_ADD_START,
-            {}
+            {name}
         );
 
         const credentialCreationOptions = parseCreationOptionsFromJSON(startResponse.options);
