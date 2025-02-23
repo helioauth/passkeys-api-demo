@@ -28,9 +28,7 @@ async function signUpWithPasskey() {
             {name: email}
         );
 
-        const credentialCreationOptions = parseCreationOptionsFromJSON(signUpResponse.options);
-
-        const publicKeyCredential = await create(credentialCreationOptions);
+        const publicKeyCredential = await webauthnJson.create(signUpResponse.options);
 
         await fetchPostAsJson(API_PATHS.SIGNUP_FINISH,
             {
@@ -58,6 +56,19 @@ async function signUpWithPasskey() {
     }
 }
 
+async function handleUserAuthenticationResponse(response) {
+    if (response.ok && response.redirected) {
+        window.location.replace(response.url);
+    } else if (response.status >= 400 && response.status <= 499) {
+        const errorDetails = await response.json();
+        showErrorMessage(errorDetails.message ?? "Invalid email address");
+    } else if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
+        showErrorMessage("Authentication cancelled.");
+    } else if (response.message !== null) {
+        showErrorMessage(response.message);
+    }
+}
+
 async function signInWithPasskey() {
     const email = document.getElementById("signin-email").value;
 
@@ -75,16 +86,7 @@ async function signInWithPasskey() {
 
         showSuccessMessage("Sign-in success! Redirecting to dashboard!");
     } catch (response) {
-        if (response.ok && response.redirected) {
-            window.location.replace(response.url);
-        } else if (response.status >= 400 && response.status <= 499) {
-            const errorDetails = await response.json();
-            showErrorMessage(errorDetails.message ?? "Invalid email address");
-        } else if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
-            showErrorMessage("Authentication cancelled.");
-        } else if (response.message !== null) {
-            showErrorMessage(response.message);
-        }
+        await handleUserAuthenticationResponse(response);
     }
 
 }
@@ -139,6 +141,34 @@ async function addPasskeyAction() {
     }
 }
 
+async function initiateAutofill() {
+    const mediationAvailable = () => {
+        const pubKeyCred = PublicKeyCredential;
+        return !!(typeof pubKeyCred.isConditionalMediationAvailable === "function" &&
+            pubKeyCred.isConditionalMediationAvailable());
+    };
+
+    if (mediationAvailable()) {
+        try {
+            const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {});
+
+            const publicKeyCredential = await webauthnJson.get({
+                publicKey: optionsResponse.options.publicKey,
+                mediation: "conditional",
+            });
+
+            await fetchPostAsJson(API_PATHS.SIGNIN_FINISH, {
+                requestId: optionsResponse.requestId,
+                publicKeyCredentialWithAssertion: JSON.stringify(publicKeyCredential)
+            });
+
+            showSuccessMessage("Sign-in success! Redirecting to dashboard!");
+        } catch (response) {
+            await handleUserAuthenticationResponse(response);
+        }
+    }
+}
+
 window.addEventListener("load", () => {
     const signUpForm = document.getElementById("signup-form");
     if (signUpForm !== null) {
@@ -160,6 +190,8 @@ window.addEventListener("load", () => {
     if (addPasskeyButton !== null) {
         addPasskeyButton.addEventListener("click", addPasskeyAction);
     }
+
+    initiateAutofill();
 });
 
 function fetchPostAsJson(input, body) {
