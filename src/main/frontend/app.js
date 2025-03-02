@@ -18,12 +18,7 @@ const API_PATHS = {
     CREDENTIALS_ADD_FINISH: `${API_PREFIX}/credentials/add/finish`
 };
 
-class UserAbortedError extends Error {
-    constructor(message = 'User aborted the operation') {
-        super(message);
-        this.name = 'UserAbortedError';
-    }
-}
+const USER_ABORTED_ERROR = "user_aborted";
 
 let authAbortController = new AbortController();
 
@@ -162,14 +157,14 @@ async function initiateAutofill() {
     }
 
     signInEmail.addEventListener("input", () => {
-        authAbortController.abort(new UserAbortedError());
+        authAbortController.abort(USER_ABORTED_ERROR);
     })
 
 
     const email = document.getElementById("email");
     if (email !== null) {
         email.addEventListener("input", () => {
-            authAbortController.abort(new UserAbortedError());
+            authAbortController.abort(USER_ABORTED_ERROR);
         });
     }
 
@@ -197,7 +192,7 @@ async function initiateAutofill() {
 
             showSuccessMessage("Sign-in success! Redirecting to dashboard!");
         } catch (error) {
-            if (error instanceof UserAbortedError) {
+            if (typeof error === "string" && error === USER_ABORTED_ERROR) {
                 return;
             }
 
