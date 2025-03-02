@@ -18,6 +18,15 @@ const API_PATHS = {
     CREDENTIALS_ADD_FINISH: `${API_PREFIX}/credentials/add/finish`
 };
 
+class UserAbortedError extends Error {
+    constructor(message = 'User aborted the operation') {
+        super(message);
+        this.name = 'UserAbortedError';
+    }
+}
+
+let authAbortController = new AbortController();
+
 async function signUpWithPasskey() {
     const displayName = document.getElementById("displayName").value;
     const email = document.getElementById("email").value;
@@ -48,7 +57,7 @@ async function signUpWithPasskey() {
             document.getElementById("email-invalid-message").innerText = (errorDetails.message ?? "Invalid email address");
             document.getElementById("email").classList.add("is-invalid");
         } else if (response.code !== null && response.code === 0 && response.name === "NotAllowedError") {
-            showErrorMessage("Authentication cancelled by user.");
+            // Authentication canceled by user.
         } else {
             showErrorMessage("Oops, something went wrong");
         }
@@ -76,6 +85,11 @@ async function signInWithPasskey() {
         const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {
             name: email
         });
+
+        if (!optionsResponse.accountExists) {
+            showErrorMessage("No account found with this email address.");
+            return;
+        }
 
         const publicKeyCredential = await webauthnJson.get(optionsResponse.options);
 
@@ -142,6 +156,23 @@ async function addPasskeyAction() {
 }
 
 async function initiateAutofill() {
+    const signInEmail = document.getElementById("signin-email");
+    if (signInEmail === null) {
+        return;
+    }
+
+    signInEmail.addEventListener("input", () => {
+        authAbortController.abort(new UserAbortedError());
+    })
+
+
+    const email = document.getElementById("email");
+    if (email !== null) {
+        email.addEventListener("input", () => {
+            authAbortController.abort(new UserAbortedError());
+        });
+    }
+
     const mediationAvailable = () => {
         const pubKeyCred = PublicKeyCredential;
         return !!(typeof pubKeyCred.isConditionalMediationAvailable === "function" &&
@@ -150,11 +181,13 @@ async function initiateAutofill() {
 
     if (mediationAvailable()) {
         try {
+            authAbortController = new AbortController();
             const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {});
 
             const publicKeyCredential = await webauthnJson.get({
                 publicKey: optionsResponse.options.publicKey,
                 mediation: "conditional",
+                signal: authAbortController.signal
             });
 
             await fetchPostAsJson(API_PATHS.SIGNIN_FINISH, {
@@ -163,8 +196,12 @@ async function initiateAutofill() {
             });
 
             showSuccessMessage("Sign-in success! Redirecting to dashboard!");
-        } catch (response) {
-            await handleUserAuthenticationResponse(response);
+        } catch (error) {
+            if (error instanceof UserAbortedError) {
+                return;
+            }
+
+            await handleUserAuthenticationResponse(error);
         }
     }
 }
