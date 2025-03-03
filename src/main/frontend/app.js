@@ -200,6 +200,10 @@ async function initiateAutofill() {
                 return;
             }
 
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return;
+            }
+
             await handleUserAuthenticationResponse(error);
         }
     }
