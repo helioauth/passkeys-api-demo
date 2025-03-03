@@ -157,14 +157,18 @@ async function initiateAutofill() {
     }
 
     signInEmail.addEventListener("input", () => {
-        authAbortController.abort(USER_ABORTED_ERROR);
+        if (!authAbortController.signal.aborted) {
+            authAbortController.abort(USER_ABORTED_ERROR);
+        }
     })
 
 
     const email = document.getElementById("email");
     if (email !== null) {
         email.addEventListener("input", () => {
-            authAbortController.abort(USER_ABORTED_ERROR);
+            if (!authAbortController.signal.aborted) {
+                authAbortController.abort(USER_ABORTED_ERROR);
+            }
         });
     }
 
