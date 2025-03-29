@@ -4,6 +4,7 @@ import jdenticon from "jdenticon/standalone";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
+const DEMO_APP_ID = window.helioauth_demo.APP_ID ?? "";
 const API_DOMAIN = window.helioauth_demo.API_URL ?? "http://localhost:8080/";
 const API_PREFIX = `${API_DOMAIN}v1`;
 
@@ -32,7 +33,7 @@ async function signUpWithPasskey() {
             {name: email}
         );
 
-        const publicKeyCredential = await webauthnJson.create(signUpResponse.options);
+        const publicKeyCredential = await webauthnJson.create(JSON.parse(signUpResponse.options));
 
         await fetchPostAsJson(API_PATHS.SIGNUP_FINISH,
             {
@@ -86,7 +87,7 @@ async function signInWithPasskey() {
             return;
         }
 
-        const publicKeyCredential = await webauthnJson.get(optionsResponse.options);
+        const publicKeyCredential = await webauthnJson.get(JSON.parse(optionsResponse.options));
 
         await fetchPostAsJson(API_PATHS.SIGNIN_FINISH, {
             requestId: optionsResponse.requestId,
@@ -183,8 +184,10 @@ async function initiateAutofill() {
             authAbortController = new AbortController();
             const optionsResponse = await fetchPostAsJson(API_PATHS.SIGNIN_START, {});
 
+            const options = JSON.parse(optionsResponse.options);
+
             const publicKeyCredential = await webauthnJson.get({
-                publicKey: optionsResponse.options.publicKey,
+                publicKey: options.publicKey,
                 mediation: "conditional",
                 signal: authAbortController.signal
             });
@@ -238,7 +241,7 @@ function fetchPostAsJson(input, body) {
     return fetch(input, {
         method: "POST",
         body: JSON.stringify(body),
-        headers: {"Content-Type": "application/json"}
+        headers: {"Content-Type": "application/json", "X-App-Id": DEMO_APP_ID}
     })
         .catch(reason => console.log("Connection error: " + reason.toString()))
         .then(resp => {

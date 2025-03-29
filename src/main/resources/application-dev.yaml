@@ -18,6 +18,9 @@ spring:
 
 passkeys-api:
   uri: http://localhost:8080/
+  # used in resources/templates/fragment-footer.html
+  app-id: 2874b5d1-c708-4d5b-87ad-06b1856e06db
+  api-key: 952f3cb0c228fbc73c6ec7e14564a762
 
 logging:
   level:
