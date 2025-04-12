@@ -89,7 +89,9 @@ public class WebSecurityConfig {
 
     @Bean
     public PasskeysApiClient passkeysApiClient (@Value("${passkeys-api.uri}") String passkeysApiUri,
+                                                @Value("${passkeys-api.app-id}") String passkeysAppId,
+                                                @Value("${passkeys-api.api-key}" ) String passkeysApiKey,
                                                 ObjectMapper objectMapper) {
-        return new DefaultPasskeysApiClient(passkeysApiUri, objectMapper);
+        return new DefaultPasskeysApiClient(passkeysApiUri, passkeysAppId, passkeysApiKey, objectMapper);
     }
 }
